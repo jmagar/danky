@@ -1,0 +1,70 @@
+//
+// The configuration file format is [JSON5](https://json5.org/),
+// where comments and trailing commas are allowed.
+// The file format is further extended to replace `${...}` notations
+// with the values of appropriate environment variables.
+// Put all the credentials and personal into the `.env` file
+// and refer to them with `${...}` notation if necessary.
+//
+{
+    "llm": {
+        "provider": "openai",
+        "modelName": "gpt-4o-mini",
+        "temperature": 0.0,
+        "mexTokens": 1000,
+    },
+    // "llm": {
+    //     "provider": "anthropic",
+    //     "modelName": "claude-3-5-haiku-latest",
+    //     "temperature": 0.0,
+    //     "mexTokens": 1000,
+    // },
+    // "llm": {
+    //     "provider": "groq",
+    //     "modelName": "mixtral-8x7b-32768",
+    //     "temperature": 0.0,
+    //     "mexTokens": 1000,
+    // },
+    "mcpServers": {
+        // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "."
+            ]
+        },
+        // https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
+        "fetch": {
+            "command": "uvx",
+            "args": ["mcp-server-fetch"]
+        },
+        // https://github.com/modelcontextprotocol/quickstart-resources/tree/main/weather-server-python
+        "weather": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@h1deya/mcp-server-weather"
+            ]
+
+        },
+        // // https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
+        // "puppeteer": {
+        //     "command": "npx",
+        //     "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+        // },
+        // // https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
+        // "brave-search": {
+        //     "command": "npx",
+        //     "args": [
+        //         "-y",
+        //         "@modelcontextprotocol/server-brave-search"
+        //     ],
+        //     "env": {
+        //         "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+        //         "PATH": "${PATH}" // Somehow, PATH need to be explicitly specified here
+        //     }
+        // },
+    }
+}

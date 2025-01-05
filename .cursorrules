@@ -1,0 +1,168 @@
+# Cursor Rules for Danky AI Chatbot
+
+# Monorepo Rules
+*:
+  - Follow monorepo package boundaries
+  - No relative imports between packages
+  - Use workspace dependencies correctly
+  - Keep shared code in packages/*
+  - Keep apps in apps/*
+  - Only global configs at root
+  - Use proper workspace references
+  - Follow changesets for versioning
+
+# TypeScript Rules
+*.ts:
+  - No any types unless absolutely necessary
+  - Use proper TypeScript types and interfaces
+  - Use zod for runtime type validation
+  - Keep files under 300 lines
+  - Use proper error handling with custom error classes
+  - Use async/await over raw promises
+  - Use proper TypeScript path aliases (@/*)
+  - Maintain strict TypeScript config
+  - Use proper module resolution
+  - Keep type definitions clean
+
+# React/Next.js Rules
+*.tsx:
+  - Use Server Components by default
+  - Add 'use client' only when necessary
+  - Keep components focused and small
+  - Use proper prop typing
+  - Use proper error boundaries
+  - Follow Next.js App Router patterns
+  - Keep pages simple, logic in components
+  - Use proper loading and error states
+  - Follow React 18 best practices
+  - Implement proper Suspense boundaries
+  - Use proper metadata
+  - Keep client bundles small
+
+# Database Rules
+**/db/**/*.ts:
+  - Use Drizzle for all database operations
+  - Keep schema definitions clean and documented
+  - Use proper indexes
+  - Use transactions where necessary
+  - Proper error handling for DB operations
+  - Use connection pooling via pgbouncer
+  - Keep migrations organized
+  - Use proper schema versioning
+  - Implement proper constraints
+  - Follow database naming conventions
+
+# API Rules
+**/api/**/*.ts:
+  - Use proper HTTP status codes
+  - Validate all inputs with zod
+  - Proper error responses
+  - Use Next.js Server Actions where appropriate
+  - Keep endpoints RESTful
+  - Document API endpoints
+  - Implement proper rate limiting
+  - Use proper caching strategies
+  - Follow API versioning conventions
+  - Implement proper security headers
+
+# MCP Rules
+**/mcp/**/*.ts:
+  # Core Protocol
+  - Follow JSON-RPC 2.0 protocol standards
+  - Implement proper tool registration and discovery
+  - Use Zod for schema validation
+  - Implement proper cleanup functions
+  - Use StdioClientTransport for communication
+  - Handle environment variables securely
+  - Validate all configurations
+  - Implement proper error handling with custom classes
+  - Follow concurrent initialization patterns
+  - Keep tool implementations modular
+
+  # Security
+  - Secure credential management via .env
+  - Validate all tool inputs and outputs
+  - Implement proper access control
+  - Use secure transport layers
+  - Follow proper logging practices
+  - Handle errors gracefully
+  - Clean up resources properly
+  - Validate server configurations
+  - Protect sensitive information
+  - Follow AI safety guidelines
+
+  # LangChain Integration
+  - Convert MCP servers to LangChain tools correctly
+  - Implement proper tool binding
+  - Handle tool execution properly
+  - Filter and format results appropriately
+  - Support multiple LLM providers
+  - Implement proper memory management
+  - Follow ReAct agent patterns
+  - Handle tool state properly
+  - Implement proper fallbacks
+  - Keep prompts organized and clean
+
+  # Configuration
+  - Use JSON5 for config files
+  - Handle environment variable substitution
+  - Validate all config fields
+  - Implement proper defaults
+  - Support multiple server configs
+  - Handle server-specific settings
+  - Implement proper cleanup
+  - Support dynamic configuration
+  - Follow naming conventions
+  - Document all options
+
+# Testing Rules
+*.test.ts:
+  - Use Vitest for all tests
+  - Mock external services
+  - Test error cases
+  - Keep tests focused
+  - Use proper test descriptions
+  - Implement proper test coverage
+  - Use proper test fixtures
+  - Follow testing best practices
+  - Test edge cases
+  - Keep tests maintainable
+
+# State Management
+**/store/**/*.ts:
+  - Use Zustand for client state
+  - Keep stores focused
+  - Use proper TypeScript types
+  - Implement proper persistence where needed
+  - Follow store naming conventions
+  - Keep state normalized
+  - Implement proper selectors
+  - Use proper middleware
+  - Follow immutability patterns
+  - Document store structure
+
+# Package Rules
+**/packages/**/*.ts:
+  - Keep packages focused
+  - Maintain clean public APIs
+  - Proper package documentation
+  - Follow semantic versioning
+  - Keep dependencies minimal
+  - Use proper exports
+  - Follow package naming conventions
+  - Implement proper package tests
+  - Keep package size optimal
+  - Document breaking changes
+
+# General Rules
+*:
+  - Use proper error tracking with Sentry
+  - Implement proper logging with Pino
+  - Follow OpenTelemetry practices
+  - Keep code DRY
+  - Use proper commenting
+  - Follow project structure
+  - Use proper environment variables
+  - Follow security best practices
+  - Keep dependencies updated
+  - Follow code review guidelines 

@@ -1,0 +1,25 @@
+Model Context Protocol AI Chatbot:
+-Monorepo
+-Next.js App Router
+-Typescript w/ React
+-pnpm
+-langchain
+-Next.js Server Actions
+-Zod for validation.
+-OpenAI, Anthropic, and OpenRouter support.
+-Dotenv for environment management.
+-Turbopack
+-eslint+prettier
+-Pino for global logging
+-Redis for caching (pub/sub for real-time updates)
+-Postgres for database
+-Drizzle for ORM
+-Qdrant for vector search
+-Shadcn/UI for component library
+-Websockets via next.js
+-Zustand for client-side state management
+-Vitest for testing
+-Sentry for error tracking/error boundaries
+-Opentelemetry for observability
+-Connection pooling for postgres and redis via pgbouncer and ioredis respectively
+-Docker compose for qdrant, postgres, and redis
