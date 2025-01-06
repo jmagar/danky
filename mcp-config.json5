@@ -8,10 +8,11 @@
 //
 {
     "llm": {
-        "provider": "openai",
-        "modelName": "gpt-4o-mini",
-        "temperature": 0.0,
-        "mexTokens": 1000,
+        "provider": "anthropic",
+        "modelName": "claude-3-opus-20240229",
+        "temperature": 0.7,
+        "maxTokens": 4096,
+        "apiKey": "${ANTHROPIC_API_KEY}"
     },
     // "llm": {
     //     "provider": "anthropic",
@@ -47,7 +48,6 @@
                 "-y",
                 "@h1deya/mcp-server-weather"
             ]
-
         },
         // // https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
         // "puppeteer": {

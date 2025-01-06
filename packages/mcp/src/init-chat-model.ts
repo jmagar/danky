@@ -25,23 +25,31 @@ export function initChatModel(config: ChatModelConfig): BaseChatModel {
 
   // remove unnecessary properties
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { provider, tools, ...llmConfig } = config;
+  const { provider, tools, apiKey, ...llmConfig } = config;
 
   try {
     switch (config.provider.toLowerCase()) {
       case 'openai':
-        model = new ChatOpenAI(llmConfig);
+        model = new ChatOpenAI({ ...llmConfig, apiKey: config.apiKey });
         break;
 
       case 'anthropic':
-        model = new ChatAnthropic(llmConfig);
+        // Anthropic requires the API key to be in the environment variable
+        if (config.apiKey) {
+          process.env.ANTHROPIC_API_KEY = config.apiKey;
+        }
+        // Convert modelName to model for Anthropic
+        const { modelName, ...rest } = llmConfig;
+        model = new ChatAnthropic({
+          ...rest,
+          model: modelName
+        });
         break;
 
       case 'groq':
-        // somehow, the API key had to be set via the env variable,
-        // even though the constructor accepts `apiKey`
-        if (llmConfig.apiKey) {
-          process.env.GROQ_API_KEY = llmConfig.apiKey;
+        // Groq requires the API key to be in the environment variable
+        if (config.apiKey) {
+          process.env.GROQ_API_KEY = config.apiKey;
         }
         model = new ChatGroq(llmConfig);
         break;

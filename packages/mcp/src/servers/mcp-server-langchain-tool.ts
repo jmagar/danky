@@ -7,7 +7,7 @@ import { CallToolResultSchema, ListToolsResultSchema } from '@modelcontextprotoc
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { jsonSchemaToZod, type JsonSchema } from '@n8n/json-schema-to-zod';
 import type { z } from 'zod';
-import { Logger } from '../logger.js';
+import { Logger } from '@danky/mcp/logger';
 
 interface MCPServerConfig {
   command: string;

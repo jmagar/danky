@@ -3,12 +3,17 @@
 
 import JSON5 from 'json5';
 import { readFileSync } from 'fs';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 export interface LLMConfig {
   provider: string;
   modelName?: string;
   temperature?: number;
   maxTokens?: number;
+  apiKey?: string;
 }
 
 export interface MCPServerConfig {
@@ -30,7 +35,10 @@ export function loadConfig(path: string): Config {
 
     // Replace environment variables in the format ${VAR_NAME} with their values
     Object.entries(process.env).forEach(([key, value]) => {
-      json5Str = json5Str.replace(`\${${key}}`, value || '');
+      const regex = new RegExp(`\\$\{${key}\}`, 'g');
+      if (value) {
+        json5Str = json5Str.replace(regex, value);
+      }
     });
 
     const config = JSON5.parse(json5Str);
@@ -91,6 +99,10 @@ function validateLLMConfig(llmConfig: any): asserts llmConfig is LLMConfig {
 
   if (llmConfig.maxTokens !== undefined && typeof llmConfig.maxTokens !== 'number') {
     throw new Error('LLM maxTokens must be a number if provided');
+  }
+
+  if (llmConfig.apiKey !== undefined && typeof llmConfig.apiKey !== 'string') {
+    throw new Error('LLM apiKey must be a string if provided');
   }
 }
 

@@ -10,8 +10,12 @@
     "paths": {
       "@/*": ["./*"],
       "@danky/ui": ["../../packages/ui/src"],
-      "@danky/ui/*": ["../../packages/ui/src/*"]
-    }
+      "@danky/ui/*": ["../../packages/ui/src/*"],
+      "@danky/mcp": ["../../packages/mcp/src"],
+      "@danky/mcp/*": ["../../packages/mcp/src/*"]
+    },
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true
   },
   "include": [
     "**/*.ts",
