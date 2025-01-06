@@ -2,11 +2,12 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    "./app/**/*.{ts,tsx}",
+    "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
-    "../../packages/ui/src/**/*.{ts,tsx}"
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    "../../packages/ui/src/**/*.{ts,tsx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -16,10 +17,6 @@ module.exports = {
       },
     },
     extend: {
-      fontFamily: {
-        sans: ["var(--font-sans)"],
-        mono: ["var(--font-mono)"],
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

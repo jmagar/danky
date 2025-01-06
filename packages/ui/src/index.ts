@@ -39,6 +39,8 @@ export * from './components/theme-provider'
 export * from './components/toast'
 export * from './components/toggle'
 export * from './components/tooltip'
+export * from './components/resizable'
+export * from './components/theme-toggle'
 
 // Hooks
 export * from './hooks/use-toast'

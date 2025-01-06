@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { ThemeProvider } from "@danky/ui"
-import { inter, jetbrainsMono } from "@danky/ui"
-import "@danky/ui/src/styles/globals.css"
+import { Toaster } from "@danky/ui"
+import "@danky/ui/styles/globals.css"
 
 export default function RootLayout({
   children,
@@ -12,8 +12,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
-      <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <title>Danky AI Chat</title>
+        <meta name="description" content="A modern AI chatbot interface" />
+      </head>
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -21,6 +24,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
