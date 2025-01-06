@@ -142,8 +142,8 @@ async function convertMCPServerToLangChainTools(
 
     const tools = toolsResponse.tools.map((tool) => (
       new DynamicStructuredTool({
-        name: `${serverName}/${tool.name}`,
-        description: tool.description || '',
+        name: `${serverName}_${tool.name}`,
+        description: `[${serverName}] ${tool.description || ''}`,
         // FIXME
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         schema: jsonSchemaToZod(tool.inputSchema as JsonSchema) as z.ZodObject<any>,
@@ -176,7 +176,6 @@ async function convertMCPServerToLangChainTools(
             .map(content => content.text)
             .join('\n\n');
 
-          // return JSON.stringify(result.content);
           return filteredResult;
         },
       })

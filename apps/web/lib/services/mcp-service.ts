@@ -32,16 +32,23 @@ export class MCPService {
       try {
         const config = loadMCPConfig()
         this.config = config
-        this.logger.info('Configuration loaded successfully')
+        this.logger.info('Configuration loaded successfully', { config: JSON.stringify(config, null, 2) })
       } catch (error) {
-        this.logger.error('Failed to load configuration')
+        this.logger.error('Failed to load configuration:', error)
         throw error
       }
 
       // Initialize LLM
       this.logger.info('Initializing LLM model')
-      const llmModel = initChatModel(this.config.llm)
-      this.llmInitialized = true
+      let llmModel
+      try {
+        llmModel = initChatModel(this.config.llm)
+        this.llmInitialized = true
+        this.logger.info('LLM model initialized successfully')
+      } catch (error) {
+        this.logger.error('Failed to initialize LLM model:', error)
+        throw error
+      }
 
       // Initialize MCP servers
       this.logger.info('Initializing MCP servers')
@@ -54,99 +61,78 @@ export class MCPService {
 
       try {
         this.logger.info('Converting MCP servers to LangChain tools...')
-        this.logger.info('Server configurations:', JSON.stringify(this.config.mcpServers, null, 2))
         
         const { allTools, cleanup } = await convertMCPServersToLangChainTools(
           this.config.mcpServers,
-          { logLevel: LogLevel[this.logger['level']].toLowerCase() as LogLevelString }
+          { 
+            logLevel: LogLevel[this.logger['level']].toLowerCase() as LogLevelString,
+            continueOnError: true // Always try to continue even if some servers fail
+          }
         )
+        
         this.cleanup = cleanup
         this.logger.info(`Successfully converted servers to ${allTools.length} LangChain tools`)
 
-        // Update status for successfully initialized servers based on tools
-        const connectedServers = new Set(allTools.map(tool => {
-          this.logger.debug(`Processing tool: ${tool.name}`)
-          const [serverId] = tool.name.split('/')
-          this.logger.debug(`Extracted server ID "${serverId}" from tool "${tool.name}"`)
-          return serverId
-        }))
-        
-        this.logger.debug('Connected servers from tool names:', Array.from(connectedServers))
+        // Update status for successfully initialized servers
+        const connectedServers = new Set<string>()
+        allTools.forEach(tool => {
+          const [serverId] = tool.name.split('_')
+          connectedServers.add(serverId)
+          this.logger.debug(`Tool "${tool.name}" initialized for server "${serverId}"`)
+        })
         
         Object.keys(this.config.mcpServers).forEach(serverName => {
-          const hasToolWithPrefix = allTools.some(tool => {
-            const matches = tool.name.startsWith(`${serverName}/`)
-            this.logger.debug(`Checking if tool "${tool.name}" belongs to server "${serverName}": ${matches}`)
-            return matches
+          const isConnected = connectedServers.has(serverName)
+          this.logger.info(`Server "${serverName}" status: ${isConnected ? 'connected' : 'disconnected'}`)
+          this.serverStatus[serverName] = { 
+            status: isConnected ? 'connected' : 'disconnected'
+          }
+        })
+
+        if (allTools.length === 0) {
+          this.logger.warn('No tools were initialized successfully')
+        } else {
+          // Create React agent with available tools
+          this.logger.info('Creating React agent with tools:')
+          allTools.forEach(tool => {
+            this.logger.info(`- ${tool.name}: ${tool.description}`)
           })
-          const isConnected = connectedServers.has(serverName) || hasToolWithPrefix
-          this.logger.info(`Updating status for server "${serverName}" to ${isConnected ? 'connected' : 'disconnected'} (has tools: ${hasToolWithPrefix})`)
-          this.serverStatus[serverName] = isConnected 
-            ? { status: 'connected' }
-            : { status: 'disconnected' }
-        })
-
-        // Create React agent with all tools
-        this.logger.info(`Creating React agent with ${allTools.length} tools:`)
-        allTools.forEach(tool => {
-          this.logger.info(`- ${tool.name}: ${tool.description}`)
-        })
-        this.agent = createReactAgent({
-          llm: llmModel,
-          tools: allTools,
-          checkpointSaver: new MemorySaver(),
-        })
-        this.logger.info('React agent created successfully')
+          
+          this.agent = createReactAgent({
+            llm: llmModel,
+            tools: allTools,
+            checkpointSaver: new MemorySaver(),
+          })
+          this.logger.info('React agent created successfully')
+        }
       } catch (error) {
-        // Parse the error message to identify which servers failed
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        this.logger.error('Error during server initialization:', errorMessage)
+        this.logger.error('Error during server initialization:', error)
         
+        // Update status for all servers to error
         Object.keys(this.config.mcpServers).forEach(serverName => {
-          if (errorMessage.includes(`MCP server "${serverName}": failed to initialize`)) {
-            this.logger.error(`Server "${serverName}" failed to initialize`)
-            this.serverStatus[serverName] = { 
-              status: 'error',
-              error: errorMessage
-            }
+          this.serverStatus[serverName] = { 
+            status: 'error',
+            error: error instanceof Error ? error.message : String(error)
           }
         })
 
-        this.logger.error('Failed to initialize some MCP servers:', error)
-        this.logger.info('Attempting to continue with any successfully initialized tools...')
-        
-        // Try to continue with any tools that did initialize
-        const { allTools = [], cleanup } = await convertMCPServersToLangChainTools(
-          this.config.mcpServers,
-          { 
-            logLevel: LogLevel[this.logger['level']].toLowerCase() as LogLevelString,
-            continueOnError: true
-          }
-        ).catch((e) => {
-          this.logger.error('Failed to initialize any tools:', e)
-          return { allTools: [], cleanup: null }
-        })
-        
-        this.cleanup = cleanup
-        this.logger.info(`Creating React agent with ${allTools.length} working tools:`)
-        allTools.forEach(tool => {
-          this.logger.info(`- ${tool.name}: ${tool.description}`)
-        })
-        this.agent = createReactAgent({
-          llm: llmModel,
-          tools: allTools,
-          checkpointSaver: new MemorySaver(),
-        })
-        this.logger.info('React agent created with partial tool set')
+        // If LLM is initialized, try to create agent without tools
+        if (this.llmInitialized) {
+          this.logger.info('Creating React agent without tools due to initialization errors')
+          this.agent = createReactAgent({
+            llm: llmModel,
+            tools: [],
+            checkpointSaver: new MemorySaver(),
+          })
+        } else {
+          throw error
+        }
       }
 
       this.logger.info('MCP Service initialization complete')
-      this.logger.info('Final server status:', JSON.stringify(this.serverStatus, null, 2))
+      this.logger.info('Final server status:', this.serverStatus)
     } catch (error) {
-      this.logger.error('Failed to initialize MCP Service')
-      if (error instanceof Error) {
-        this.logger.error('Error:', error.message)
-      }
+      this.logger.error('Failed to initialize MCP Service:', error)
       throw error
     }
   }
@@ -170,7 +156,7 @@ export class MCPService {
           return "I apologize, but the Brave Search tool is not currently available. Please try again later or use a different tool."
         }
         // Add context to help the agent use the Brave Search tool
-        message = `Use the Brave Search tool to ${message}`
+        message = `Use the brave_search_web_search tool to ${message}`
       }
 
       const weatherMatch = message.match(/weather/i)
@@ -179,14 +165,14 @@ export class MCPService {
           return "I apologize, but the Weather tool is not currently available. Please try again later or use a different tool."
         }
         // Add context to help the agent use the Weather tool
-        message = `Use the Weather tool to ${message}`
+        message = `Use the weather_get_forecast tool to ${message}`
       }
 
       // Check if the message is explicitly requesting filesystem operations
       const fileSystemMatch = message.match(/file|directory|read|write|search files?|list files?/i)
       if (!fileSystemMatch && this.serverStatus['filesystem']?.status === 'connected') {
         // If not explicitly requesting filesystem operations, prevent filesystem tool usage
-        message = `Do not use filesystem tools unless explicitly requested. ${message}`
+        message = `Do not use filesystem_* tools unless explicitly requested. ${message}`
       }
 
       this.logger.info('Modified message:', message)
@@ -232,7 +218,19 @@ export class MCPService {
   }
 
   getAvailableTools(): Array<{ serverId: string; toolId: string; name: string; description: string }> {
-    // TODO: Implement tool discovery from connected servers
-    return []
+    if (!this.agent) {
+      return []
+    }
+
+    const tools = (this.agent as any).tools ?? []
+    return tools.map((tool: { name: string; description: string }) => {
+      const [serverId, toolId] = tool.name.split('/')
+      return {
+        serverId,
+        toolId,
+        name: tool.name,
+        description: tool.description
+      }
+    })
   }
 } 
