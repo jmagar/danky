@@ -1,0 +1,33 @@
+{
+  "name": "@danky/mcp",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "^0.3.11",
+    "@langchain/community": "^0.3.20",
+    "@langchain/core": "^0.3.26",
+    "@langchain/groq": "^0.1.2",
+    "@langchain/langgraph": "^0.2.36",
+    "@langchain/openai": "^0.3.16",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@n8n/json-schema-to-zod": "^1.1.0",
+    "dotenv": "^16.4.7",
+    "json5": "^2.2.3",
+    "yargs": "^17.7.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@danky/eslint-config": "workspace:*",
+    "@danky/typescript-config": "workspace:*",
+    "@types/yargs": "^17.0.33",
+    "eslint": "^9.0.0",
+    "typescript": "^5.3.3"
+  }
+} 

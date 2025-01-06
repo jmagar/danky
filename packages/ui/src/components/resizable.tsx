@@ -7,19 +7,25 @@ import {
   PanelResizeHandle,
   type ImperativePanelGroupHandle,
   type ImperativePanelHandle,
+  type PanelProps,
+  type PanelResizeHandleProps,
+  type PanelGroupProps,
 } from "react-resizable-panels"
 import { cn } from "../lib/utils"
 
-interface ResizablePanelGroupProps extends React.ComponentPropsWithoutRef<typeof PanelGroup> {
+interface ResizablePanelGroupProps extends PanelGroupProps {
   className?: string
 }
 
-interface ResizablePanelProps extends React.ComponentPropsWithoutRef<typeof Panel> {
+interface ResizablePanelProps extends Omit<PanelProps, 'onCollapse'> {
   className?: string
+  collapsed?: boolean
+  onCollapse?: (collapsed: boolean) => void
 }
 
-interface ResizableHandleProps extends React.ComponentPropsWithoutRef<typeof PanelResizeHandle> {
+interface ResizableHandleProps extends Omit<PanelResizeHandleProps, 'children'> {
   className?: string
+  withHandle?: boolean
 }
 
 const ResizablePanelGroup = React.forwardRef<ImperativePanelGroupHandle, ResizablePanelGroupProps>(
@@ -37,25 +43,34 @@ const ResizablePanelGroup = React.forwardRef<ImperativePanelGroupHandle, Resizab
 ResizablePanelGroup.displayName = "ResizablePanelGroup"
 
 const ResizablePanel = React.forwardRef<ImperativePanelHandle, ResizablePanelProps>(
-  ({ className, ...props }, ref) => (
-    <Panel
-      ref={ref}
-      className={cn("relative flex h-full w-full", className)}
-      {...props}
-    />
-  )
+  ({ className, collapsed, onCollapse, ...props }, ref) => {
+    const [isCollapsed, setIsCollapsed] = React.useState(collapsed)
+
+    React.useEffect(() => {
+      setIsCollapsed(collapsed)
+    }, [collapsed])
+
+    const handleCollapse = React.useCallback(() => {
+      const newCollapsed = !isCollapsed
+      setIsCollapsed(newCollapsed)
+      onCollapse?.(newCollapsed)
+    }, [isCollapsed, onCollapse])
+
+    return (
+      <Panel
+        ref={ref}
+        className={cn("relative flex h-full w-full", className)}
+        onCollapse={handleCollapse}
+        {...props}
+      />
+    )
+  }
 )
 ResizablePanel.displayName = "ResizablePanel"
 
 const ResizableHandle = React.forwardRef<HTMLDivElement, ResizableHandleProps>(
-  ({ className, ...props }, ref) => (
-    <PanelResizeHandle
-      className={cn(
-        "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
-        className
-      )}
-      {...props}
-    >
+  ({ className, withHandle, ...props }, ref) => {
+    const handle = withHandle ? (
       <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -71,8 +86,20 @@ const ResizableHandle = React.forwardRef<HTMLDivElement, ResizableHandleProps>(
           <path d="M8 13L12 17L16 13" />
         </svg>
       </div>
-    </PanelResizeHandle>
-  )
+    ) : null
+
+    return (
+      <PanelResizeHandle
+        {...props}
+        className={cn(
+          "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+          className
+        )}
+      >
+        {handle}
+      </PanelResizeHandle>
+    )
+  }
 )
 ResizableHandle.displayName = "ResizableHandle"
 
