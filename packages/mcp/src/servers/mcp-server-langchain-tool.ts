@@ -8,6 +8,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { jsonSchemaToZod, type JsonSchema } from '@n8n/json-schema-to-zod';
 import type { z } from 'zod';
 import { Logger } from '@danky/mcp/logger';
+import { type LogLevelString } from '../logger'
 
 interface MCPServerConfig {
   command: string;
@@ -19,8 +20,9 @@ export interface MCPServersConfig {
   [key: string]: MCPServerConfig;
 }
 
-interface LogOptions {
-  logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
+export interface LogOptions {
+  logLevel?: LogLevelString
+  continueOnError?: boolean
 }
 
 interface MCPError extends Error {
@@ -140,14 +142,14 @@ async function convertMCPServerToLangChainTools(
 
     const tools = toolsResponse.tools.map((tool) => (
       new DynamicStructuredTool({
-        name: tool.name,
+        name: `${serverName}/${tool.name}`,
         description: tool.description || '',
         // FIXME
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         schema: jsonSchemaToZod(tool.inputSchema as JsonSchema) as z.ZodObject<any>,
 
         func: async (input) => {
-          logger.info(`MCP Tool "${tool.name}" received input:`, input);
+          logger.info(`MCP Tool "${serverName}/${tool.name}" received input:`, input);
 
           if (Object.keys(input).length === 0) {
             return 'No input provided';
@@ -166,7 +168,7 @@ async function convertMCPServerToLangChainTools(
           );
 
           const roughLength = JSON.stringify(result).length;
-          logger.info(`MCP Tool "${tool.name}" received result (length: ${roughLength})`);
+          logger.info(`MCP Tool "${serverName}/${tool.name}" received result (length: ${roughLength})`);
           logger.debug('result:', result);
 
           const filteredResult = result?.content
@@ -181,7 +183,7 @@ async function convertMCPServerToLangChainTools(
     ));
 
     logger.info(`MCP server "${serverName}": found ${tools.length} tool(s)`);
-    tools.forEach((tool) => logger.debug(`- ${tool.name}`));
+    tools.forEach((tool) => logger.debug(`- ${serverName}/${tool.name}`));
 
     async function cleanup(): Promise<void> {
       if (transport) {

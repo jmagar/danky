@@ -10,6 +10,7 @@ dotenv.config();
 
 export interface LLMConfig {
   provider: string;
+  model?: string;
   modelName?: string;
   temperature?: number;
   maxTokens?: number;
@@ -87,6 +88,10 @@ function validateLLMConfig(llmConfig: any): asserts llmConfig is LLMConfig {
 
   if (typeof llmConfig.provider !== 'string') {
     throw new Error('LLM provider must be a string');
+  }
+
+  if (llmConfig.model !== undefined && typeof llmConfig.model !== 'string') {
+    throw new Error('LLM model must be a string if provided');
   }
 
   if (llmConfig.modelName !== undefined && typeof llmConfig.modelName !== 'string') {

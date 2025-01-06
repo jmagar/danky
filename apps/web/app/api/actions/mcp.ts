@@ -9,7 +9,7 @@ let mcpService: MCPService | null = null
 // Initialize MCP service if not already initialized
 async function ensureInitialized() {
   if (!mcpService) {
-    mcpService = new MCPService()
+    mcpService = new MCPService({ logLevel: 'debug' })
     await mcpService.initialize()
   }
   return mcpService

@@ -14,7 +14,6 @@ import {
   ToolsButton,
 } from "@danky/ui"
 import { SendHorizontal } from "lucide-react"
-import { getServerStatus, getAvailableTools, processMessage } from "./api/actions/mcp"
 
 interface Message {
   role: "user" | "assistant"
@@ -52,57 +51,46 @@ export default function ChatPage() {
     },
   ])
   const [servers, setServers] = useState<Server[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isAgentReady, setIsAgentReady] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const fetchMCPData = async () => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    const checkAgentStatus = async () => {
       try {
-        // Fetch server status
-        const serverRes = await getServerStatus()
-        if (!serverRes.success || !serverRes.status) return
-
-        // Fetch available tools
-        const toolsRes = await getAvailableTools()
-        if (!toolsRes.success || !toolsRes.tools) return
-
-        // Group tools by server
-        const toolsByServer = toolsRes.tools.reduce((acc, tool) => {
-          if (!acc[tool.serverId]) {
-            acc[tool.serverId] = []
-          }
-          acc[tool.serverId].push({
-            id: tool.toolId,
-            name: tool.name,
-            description: tool.description,
-          })
-          return acc
-        }, {} as Record<string, Server['tools']>)
-
-        // Create server list
-        const serverList = Object.entries(serverRes.status).map(([id, status]) => ({
-          id,
-          name: id.charAt(0).toUpperCase() + id.slice(1), // Capitalize first letter
-          status: status as Server['status'],
-          tools: toolsByServer[id] || [],
-        }))
-
-        setServers(serverList)
+        const res = await fetch("/api/chat")
+        const data = await res.json()
+        
+        if (data.status === "ready") {
+          setIsAgentReady(true)
+          setServers(Array.isArray(data.servers) ? data.servers : [])
+        } else {
+          setIsAgentReady(false)
+          setServers([])
+          // Retry after 5 seconds if not ready
+          setTimeout(checkAgentStatus, 5000)
+        }
       } catch (error) {
-        console.error('Failed to fetch MCP data:', error)
+        console.error("Failed to check agent status:", error)
+        setIsAgentReady(false)
+        setServers([])
+        // Retry after 5 seconds on error
+        setTimeout(checkAgentStatus, 5000)
       }
     }
 
-    // Initial fetch
-    fetchMCPData()
-
-    // Set up polling for updates every 30 seconds
-    const interval = setInterval(fetchMCPData, 30000)
-
-    return () => clearInterval(interval)
-  }, [])
+    checkAgentStatus()
+  }, [mounted])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || isLoading || !isAgentReady) return
 
     const userMessage: Message = { 
       role: "user", 
@@ -111,29 +99,39 @@ export default function ChatPage() {
     }
     setMessages((prev) => [...prev, userMessage])
     setInput("")
+    setIsLoading(true)
 
     try {
-      // Process the message through MCP
-      const response = await processMessage({ message: input })
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: input }),
+      })
+
+      const data = await response.json()
       
-      if (!response.success || !response.response) {
-        throw new Error(response.error || 'Failed to process message')
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process message")
       }
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: response.response,
+        content: data.response || "I apologize, but I encountered an error processing your message. Please try again.",
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error('Error processing message:', error)
+      console.error("Error processing message:", error)
       const errorMessage: Message = {
         role: "assistant",
-        content: "I apologize, but I encountered an error processing your message. Please try again.",
+        content: error instanceof Error ? error.message : "I apologize, but I encountered an error processing your message. Please try again.",
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -145,6 +143,7 @@ export default function ChatPage() {
       timestamp: new Date(),
     }
     setChatSessions((prev) => [newSession, ...prev])
+    setMessages([])
   }
 
   const formatTime = (date: Date) => {
@@ -180,13 +179,14 @@ export default function ChatPage() {
         </ScrollArea>
       }
       toolsButton={
-        <ToolsButton
-          servers={servers}
-          onToolSelect={(serverId, toolId) => {
-            console.log("Selected tool:", serverId, toolId)
-            // TODO: Implement tool execution
-          }}
-        />
+        mounted ? (
+          <ToolsButton
+            servers={servers}
+            onToolSelect={(serverId, toolId) => {
+              console.log("Selected tool:", serverId, toolId)
+            }}
+          />
+        ) : null
       }
     >
       <div className="flex flex-col h-full">
@@ -234,8 +234,9 @@ export default function ChatPage() {
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
+                placeholder={!mounted ? "Loading..." : isAgentReady ? "Type your message..." : "Initializing..."}
                 className="min-h-[60px]"
+                disabled={!mounted || !isAgentReady}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault()
@@ -243,7 +244,11 @@ export default function ChatPage() {
                   }
                 }}
               />
-              <Button type="submit" size="icon" disabled={!input.trim()}>
+              <Button 
+                type="submit" 
+                size="icon" 
+                disabled={!mounted || !input.trim() || isLoading || !isAgentReady}
+              >
                 <SendHorizontal className="h-4 w-4" />
               </Button>
             </form>

@@ -9,39 +9,26 @@
 {
     "llm": {
         "provider": "anthropic",
-        "modelName": "claude-3-opus-20240229",
+        "model": "claude-3-5-sonnet-20241022",
         "temperature": 0.7,
         "maxTokens": 4096,
         "apiKey": "${ANTHROPIC_API_KEY}"
     },
-    // "llm": {
-    //     "provider": "anthropic",
-    //     "modelName": "claude-3-5-haiku-latest",
-    //     "temperature": 0.0,
-    //     "mexTokens": 1000,
-    // },
-    // "llm": {
-    //     "provider": "groq",
-    //     "modelName": "mixtral-8x7b-32768",
-    //     "temperature": 0.0,
-    //     "mexTokens": 1000,
-    // },
     "mcpServers": {
-        // https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
         "filesystem": {
             "command": "npx",
             "args": [
                 "-y",
-                "@modelcontextprotocol/server-filesystem",
-                "."
+                "mcp-server-filesystem",
+                "/home/jmagar/code/danky/"
             ]
         },
-        // https://github.com/modelcontextprotocol/servers/tree/main/src/fetch
         "fetch": {
             "command": "uvx",
-            "args": ["mcp-server-fetch"]
+            "args": [
+                "mcp-server-fetch"
+            ]
         },
-        // https://github.com/modelcontextprotocol/quickstart-resources/tree/main/weather-server-python
         "weather": {
             "command": "npx",
             "args": [
@@ -49,22 +36,15 @@
                 "@h1deya/mcp-server-weather"
             ]
         },
-        // // https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer
-        // "puppeteer": {
-        //     "command": "npx",
-        //     "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
-        // },
-        // // https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search
-        // "brave-search": {
-        //     "command": "npx",
-        //     "args": [
-        //         "-y",
-        //         "@modelcontextprotocol/server-brave-search"
-        //     ],
-        //     "env": {
-        //         "BRAVE_API_KEY": "${BRAVE_API_KEY}",
-        //         "PATH": "${PATH}" // Somehow, PATH need to be explicitly specified here
-        //     }
-        // },
+        "brave-search": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-brave-search"
+            ],
+            "env": {
+                "BRAVE_API_KEY": "BSAqnAtouLsR8AtRrsdv7Xy78ddheDR"
+            }
+        }
     }
 }

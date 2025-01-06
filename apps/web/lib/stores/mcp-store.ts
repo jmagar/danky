@@ -21,7 +21,7 @@ interface MCPState {
   serverStatus: Record<string, ServerStatus>
   availableTools: Tool[]
   error: string | null
-  initialize: (configPath?: string) => Promise<void>
+  initialize: () => Promise<void>
   shutdown: () => Promise<void>
   processMessage: (message: string) => Promise<string>
 }
@@ -44,18 +44,41 @@ const createMCPStore: MCPStore = (set: SetState, get: GetState) => ({
   availableTools: [],
   error: null,
 
-  initialize: async (configPath?: string) => {
+  initialize: async () => {
     if (get().isInitializing || get().isInitialized) return
 
     set({ isInitializing: true, error: null })
     
     try {
-      const service = new MCPService({ logLevel: 'info' })
-      await service.initialize(configPath)
+      // First validate that we have the required API key
+      if (!process.env.ANTHROPIC_API_KEY) {
+        throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+      }
+
+      const service = new MCPService({ logLevel: 'debug' })
+      
+      try {
+        await service.initialize()
+      } catch (initError) {
+        // If server initialization fails but the service is still usable
+        // (i.e., the LLM is initialized), we'll continue with degraded functionality
+        console.warn('Some MCP servers failed to initialize:', initError)
+        set({
+          error: initError instanceof Error ? initError.message : 'Some MCP servers failed to initialize',
+        })
+      }
+      
+      // Even if some servers fail, we can still use the service if it's partially initialized
+      if (!service.isPartiallyInitialized()) {
+        throw new Error('MCP Service failed to initialize any components')
+      }
       
       const serverStatus = Object.entries(service.getServerStatus()).reduce(
         (acc, [serverId, status]) => {
-          acc[serverId] = { status }
+          acc[serverId] = { 
+            status,
+            error: status === 'error' ? 'Failed to initialize server' : undefined
+          }
           return acc
         },
         {} as Record<string, ServerStatus>
@@ -69,10 +92,19 @@ const createMCPStore: MCPStore = (set: SetState, get: GetState) => ({
         availableTools: service.getAvailableTools(),
       })
     } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? `Failed to initialize MCP: ${error.message}`
+        : 'Failed to initialize MCP'
+      
       set({
-        error: error instanceof Error ? error.message : 'Failed to initialize MCP',
+        error: errorMessage,
         isInitializing: false,
+        service: null,
+        isInitialized: false,
+        serverStatus: {},
       })
+      
+      throw new Error(errorMessage)
     }
   },
 

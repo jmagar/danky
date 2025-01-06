@@ -14,6 +14,7 @@ import { type Tool } from '@langchain/core/tools';
 interface ChatModelConfig {
   provider: string;
   apiKey?: string;
+  model?: string;
   modelName?: string;
   temperature?: number;
   maxTokens?: number,
@@ -36,20 +37,27 @@ export function initChatModel(config: ChatModelConfig): BaseChatModel {
       case 'anthropic':
         // Anthropic requires the API key to be in the environment variable
         if (config.apiKey) {
-          process.env.ANTHROPIC_API_KEY = config.apiKey;
+          Object.assign(process.env, { ANTHROPIC_API_KEY: config.apiKey });
         }
-        // Convert modelName to model for Anthropic
-        const { modelName, ...rest } = llmConfig;
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) {
+          throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+        }
+        // Log the first and last 4 characters of the API key for debugging
+        console.log('Using Anthropic API Key:', `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`);
+        
         model = new ChatAnthropic({
-          ...rest,
-          model: modelName
+          apiKey,
+          model: config.model || 'claude-3-opus-20240229',
+          temperature: config.temperature,
+          maxTokens: config.maxTokens
         });
         break;
 
       case 'groq':
         // Groq requires the API key to be in the environment variable
         if (config.apiKey) {
-          process.env.GROQ_API_KEY = config.apiKey;
+          Object.assign(process.env, { GROQ_API_KEY: config.apiKey });
         }
         model = new ChatGroq(llmConfig);
         break;
