@@ -1,16 +1,3 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import baseConfig from "@danky/eslint-config/base";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-    },
-    files: ['**/*.ts', '**/*.tsx'],
-  }
-);
+export default baseConfig;

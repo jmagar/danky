@@ -4,9 +4,9 @@
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { MemorySaver } from '@langchain/langgraph';
 import { HumanMessage } from '@langchain/core/messages';
-import { convertMCPServersToLangChainTools, MCPServerCleanupFunction } from './servers/mcp-server-langchain-tool.js';
+import { convertMCPServersToLangChainTools, type MCPServerCleanupFunction } from './servers/mcp-server-langchain-tool.js';
 import { initChatModel } from './init-chat-model.js';
-import { loadConfig, Config } from './load-config.js';
+import { loadConfig, type Config } from './load-config.js';
 import readline from 'readline';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';

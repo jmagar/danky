@@ -1,8 +1,23 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "@danky/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@danky/ui/*": ["./src/*"],
+      "@danky/lib/utils": ["./src/lib/utils"]
+    },
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "target": "es2018",
+    "outDir": "./dist",
+    "rootDir": "."
   },
-  "include": ["src"],
+  "include": [
+    "src/**/*",
+    "@danky/ui/**/*",
+    "turbo/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

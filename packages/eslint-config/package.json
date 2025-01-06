@@ -1,24 +1,31 @@
 {
-  "name": "@repo/eslint-config",
-  "version": "0.0.0",
-  "type": "module",
+  "name": "@danky/eslint-config",
+  "version": "0.0.1",
   "private": true,
+  "type": "module",
   "exports": {
     "./base": "./base.js",
-    "./next-js": "./next.js",
     "./react-internal": "./react-internal.js"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@next/eslint-plugin-next": "^15.1.0",
-    "eslint": "^9.15.0",
+  "main": "./base.js",
+  "files": [
+    "base.js",
+    "react-internal.js"
+  ],
+  "dependencies": {
+    "@eslint/js": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-config-turbo": "^1.11.2",
     "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-turbo": "^2.3.0",
-    "globals": "^15.12.0",
-    "typescript": "^5.3.3",
-    "typescript-eslint": "^8.15.0"
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-turbo": "^1.13.4",
+    "globals": "^13.24.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": ">=4.7.4"
   }
 }

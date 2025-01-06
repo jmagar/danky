@@ -4,7 +4,8 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
-    "lint": "eslint src"
+    "lint": "/home/jmagar/.nvm/versions/node/v20.11.0/bin/eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@langchain/anthropic": "^0.3.11",
@@ -22,12 +23,13 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
+    "@danky/eslint-config": "workspace:*",
+    "@danky/typescript-config": "workspace:*",
+    "@eslint/js": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
     "eslint": "^9.17.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.19.0"
+    "typescript": "^5.7.2"
   }
 }

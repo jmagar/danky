@@ -4,8 +4,8 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGroq } from '@langchain/groq';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { Tool } from '@langchain/core/tools';
+import { type BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { type Tool } from '@langchain/core/tools';
 
 // FIXME: no typescript version of init_chat_model()? (or the Python version is gone?)
 // Ref: https://python.langchain.com/api_reference/langchain/chat_models/langchain.chat_models.base.init_chat_model.html

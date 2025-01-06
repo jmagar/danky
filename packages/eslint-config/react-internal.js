@@ -6,34 +6,56 @@ import pluginReact from "eslint-plugin-react";
 import globals from "globals";
 import { config as baseConfig } from "./base.js";
 
-/**
- * A custom ESLint configuration for libraries that use React.
- *
- * @type {import("eslint").Linter.Config} */
+/** @type {import("eslint").Linter.FlatConfig[]} */
 export const config = [
+  {
+    ignores: ["node_modules/**", "dist/**", ".next/**", "coverage/**", "*.config.*"],
+  },
   ...baseConfig,
   js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
   {
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+      "react": pluginReact,
+      "react-hooks": pluginReactHooks,
+    },
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
       globals: {
         ...globals.serviceworker,
         ...globals.browser,
+        React: "readonly",
       },
     },
-  },
-  {
-    plugins: {
-      "react-hooks": pluginReactHooks,
+    settings: { 
+      react: { version: "detect" },
+      "import/resolver": {
+        typescript: true,
+        node: true,
+      },
     },
-    settings: { react: { version: "detect" } },
     rules: {
+      ...tseslint.configs.recommended.rules,
+      ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
-      // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off",
+      "no-unused-vars": "warn",
+      "no-undef": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react/no-unknown-property": ["error", { 
+        "ignore": ["cmdk-input-wrapper"] 
+      }],
     },
   },
+  eslintConfigPrettier,
 ];

@@ -70,4 +70,5 @@ class Logger {
   fatal = this.createLogMethod(LogLevel.FATAL);
 }
 
-export { Logger, LogLevel, LogLevelString };
+export { Logger, LogLevel };
+export type { LogLevelString };

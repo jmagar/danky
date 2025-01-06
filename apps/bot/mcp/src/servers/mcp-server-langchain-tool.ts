@@ -5,8 +5,8 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { CallToolResultSchema, ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { jsonSchemaToZod, JsonSchema } from '@n8n/json-schema-to-zod';
-import { z } from 'zod';
+import { jsonSchemaToZod, type JsonSchema } from '@n8n/json-schema-to-zod';
+import type { z } from 'zod';
 import { Logger } from '../logger.js';
 
 interface MCPServerConfig {
