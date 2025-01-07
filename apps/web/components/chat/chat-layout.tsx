@@ -15,22 +15,22 @@ interface ChatLayoutProps {
   children?: React.ReactNode
   sidebar?: React.ReactNode
   toolsButton?: React.ReactNode
-  _className?: string
+  className?: string
 }
 
 export function ChatLayout({
   children,
   sidebar,
   toolsButton,
-  _className,
+  className,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
 
   return (
-    <div className="fixed inset-0">
+    <div className="h-[100dvh] w-full">
       <ResizablePanelGroup
         direction="horizontal"
-        className="h-full"
+        className="h-full w-full items-stretch"
       >
         <ResizablePanel
           defaultSize={15}
@@ -41,18 +41,18 @@ export function ChatLayout({
           onCollapse={() => setIsCollapsed(true)}
           onExpand={() => setIsCollapsed(false)}
           className={cn(
-            "bg-background border-r",
+            "bg-background/50 h-full",
             isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out"
           )}
         >
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full w-full">
             {sidebar}
           </ScrollArea>
         </ResizablePanel>
         <ResizableHandle withHandle className="w-[2px] bg-border" />
-        <ResizablePanel defaultSize={85} className="bg-background">
-          <div className="flex h-full flex-col">
-            <div className="flex h-14 items-center border-b">
+        <ResizablePanel defaultSize={85} className="bg-background h-full">
+          <div className="flex h-full flex-col w-full">
+            <div className="flex h-14 items-center border-b w-full">
               <div className="flex w-full items-center px-4">
                 <div className="flex items-center gap-2">
                   <Button
