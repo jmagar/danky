@@ -35,19 +35,16 @@ export function initChatModel(config: ChatModelConfig): BaseChatModel {
         break;
 
       case 'anthropic':
-        // Anthropic requires the API key to be in the environment variable
-        if (config.apiKey) {
-          Object.assign(process.env, { ANTHROPIC_API_KEY: config.apiKey });
-        }
-        const apiKey = process.env.ANTHROPIC_API_KEY;
-        if (!apiKey) {
-          throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+        // Use the API key from config or environment
+        const anthropicApiKey = config.apiKey || process.env.ANTHROPIC_API_KEY;
+        if (!anthropicApiKey) {
+          throw new Error('ANTHROPIC_API_KEY not found in config or environment')
         }
         // Log the first and last 4 characters of the API key for debugging
-        console.log('Using Anthropic API Key:', `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`);
+        console.log('Using Anthropic API Key:', `${anthropicApiKey.slice(0, 4)}...${anthropicApiKey.slice(-4)}`);
         
         model = new ChatAnthropic({
-          apiKey,
+          apiKey: anthropicApiKey,
           model: config.model || 'claude-3-opus-20240229',
           temperature: config.temperature,
           maxTokens: config.maxTokens
@@ -55,11 +52,12 @@ export function initChatModel(config: ChatModelConfig): BaseChatModel {
         break;
 
       case 'groq':
-        // Groq requires the API key to be in the environment variable
-        if (config.apiKey) {
-          Object.assign(process.env, { GROQ_API_KEY: config.apiKey });
+        // Use the API key from config or environment
+        const groqApiKey = config.apiKey || process.env.GROQ_API_KEY;
+        if (!groqApiKey) {
+          throw new Error('GROQ_API_KEY not found in config or environment')
         }
-        model = new ChatGroq(llmConfig);
+        model = new ChatGroq({ ...llmConfig, apiKey: groqApiKey });
         break;
 
       default:

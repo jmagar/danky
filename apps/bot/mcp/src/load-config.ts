@@ -3,12 +3,61 @@
 
 import JSON5 from 'json5';
 import { readFileSync } from 'fs';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from root .env file
+const rootEnvPath = path.resolve(__dirname, '../../../../.env');
+dotenv.config({ path: rootEnvPath });
+
+// Validate required environment variables
+function validateEnvironmentVariables(config: Config): void {
+  const missingVars = new Set<string>();
+
+  // Check LLM API keys
+  if (config.llm?.apiKey?.includes('${')) {
+    const matches = config.llm.apiKey.match(/\$\{([^}]+)\}/g);
+    if (matches) {
+      matches.forEach(match => {
+        const varName = match.slice(2, -1);
+        if (!process.env[varName]) {
+          missingVars.add(varName);
+        }
+      });
+    }
+  }
+
+  // Check server environment variables
+  Object.entries(config.mcpServers || {}).forEach(([serverName, server]) => {
+    if (server.env) {
+      Object.values(server.env).forEach(value => {
+        if (typeof value === 'string' && value.includes('${')) {
+          const matches = value.match(/\$\{([^}]+)\}/g);
+          if (matches) {
+            matches.forEach(match => {
+              const varName = match.slice(2, -1);
+              if (!process.env[varName]) {
+                missingVars.add(varName);
+              }
+            });
+          }
+        }
+      });
+    }
+  });
+
+  if (missingVars.size > 0) {
+    throw new Error(`Missing required environment variables: ${Array.from(missingVars).join(', ')}. Make sure these are set in the root .env file.`);
+  }
+}
 
 export interface LLMConfig {
   provider: string;
+  model?: string;
   modelName?: string;
   temperature?: number;
   maxTokens?: number;
+  apiKey?: string;
 }
 
 export interface MCPServerConfig {
@@ -24,13 +73,16 @@ export interface Config {
   }
 }
 
-export function loadConfig(path: string): Config {
+export function loadConfig(configPath: string): Config {
   try {
-    let json5Str = readFileSync(path, 'utf-8');
+    let json5Str = readFileSync(configPath, 'utf-8');
 
     // Replace environment variables in the format ${VAR_NAME} with their values
     Object.entries(process.env).forEach(([key, value]) => {
-      json5Str = json5Str.replace(`\${${key}}`, value || '');
+      const regex = new RegExp(`\\$\{${key}\}`, 'g');
+      if (value) {
+        json5Str = json5Str.replace(regex, value);
+      }
     });
 
     const config = JSON5.parse(json5Str);
@@ -38,10 +90,13 @@ export function loadConfig(path: string): Config {
     // Validate required fields
     validateConfig(config);
 
+    // Validate environment variables
+    validateEnvironmentVariables(config);
+
     return config;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to load configuration from "${path}": ${error.message}`);
+      throw new Error(`Failed to load configuration from "${configPath}": ${error.message}`);
     }
     throw error;
   }
@@ -81,6 +136,10 @@ function validateLLMConfig(llmConfig: any): asserts llmConfig is LLMConfig {
     throw new Error('LLM provider must be a string');
   }
 
+  if (llmConfig.model !== undefined && typeof llmConfig.model !== 'string') {
+    throw new Error('LLM model must be a string if provided');
+  }
+
   if (llmConfig.modelName !== undefined && typeof llmConfig.modelName !== 'string') {
     throw new Error('LLM modelName must be a string if provided');
   }
@@ -91,6 +150,10 @@ function validateLLMConfig(llmConfig: any): asserts llmConfig is LLMConfig {
 
   if (llmConfig.maxTokens !== undefined && typeof llmConfig.maxTokens !== 'number') {
     throw new Error('LLM maxTokens must be a number if provided');
+  }
+
+  if (llmConfig.apiKey !== undefined && typeof llmConfig.apiKey !== 'string') {
+    throw new Error('LLM apiKey must be a string if provided');
   }
 }
 

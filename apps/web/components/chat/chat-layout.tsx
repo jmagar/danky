@@ -25,7 +25,7 @@ export function ChatLayout({
     <div className="h-[100dvh] w-full flex">
       <div
         className={cn(
-          "bg-background/50 h-full transition-all duration-300 ease-in-out border-r",
+          "bg-background/50 h-full transition-all duration-300 ease-in-out border-r backdrop-blur-sm",
           isCollapsed ? "w-0" : "w-[280px]"
         )}
       >
@@ -33,23 +33,27 @@ export function ChatLayout({
       </div>
       <div className="flex-1 bg-background h-full">
         <div className="flex h-full flex-col w-full">
-          <div className="flex h-14 items-center justify-between border-b px-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="h-8 w-8"
-            >
-              {isCollapsed ? (
-                <PanelLeftOpen className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
-            </Button>
-            <div className="flex items-center gap-4">
-              <Search />
+          <div className="relative flex h-14 items-center border-b px-4 backdrop-blur-sm bg-background/50">
+            <div className="absolute left-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="h-8 w-8 hover:bg-muted/80 transition-colors"
+              >
+                {isCollapsed ? (
+                  <PanelLeftOpen className="h-4 w-4" />
+                ) : (
+                  <PanelLeftClose className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-            <div className="flex-1 flex justify-end items-center gap-2">
+            <div className="flex-1 flex justify-center items-center px-16">
+              <div className="w-full max-w-2xl">
+                <Search />
+              </div>
+            </div>
+            <div className="absolute right-4 flex items-center gap-2">
               <ThemeToggle />
               <NotificationsPopover />
             </div>

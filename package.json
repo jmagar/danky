@@ -6,9 +6,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "clean": "rm -rf node_modules && pnpm -r exec rm -rf .next .turbo dist node_modules",
-    "clean:workspaces": "pnpm -r exec rm -rf .next .turbo dist node_modules"
+    "clean": "turbo clean",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
     "@danky/typescript-config": "workspace:*",

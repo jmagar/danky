@@ -7,8 +7,8 @@ import { CallToolResultSchema, ListToolsResultSchema } from '@modelcontextprotoc
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import type { JsonSchema } from '@n8n/json-schema-to-zod';
 import type { z } from 'zod';
-import { Logger } from '@danky/mcp/logger';
-import { type LogLevelString } from '../logger'
+import { Logger } from '../logger.js';
+import { type LogLevelString } from '../logger.js';
 
 // Import jsonSchemaToZod using require
 const { jsonSchemaToZod } = require('@n8n/json-schema-to-zod/dist/cjs/index.js');

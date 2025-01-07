@@ -17,8 +17,9 @@ import path from 'path';
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
-// Initialize environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
+// Load environment variables from root .env file
+const rootEnvPath = path.resolve(__dirname, '../../../../.env');
+dotenv.config({ path: rootEnvPath });
 
 // Constants
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '../../../../mcp-config.json5');

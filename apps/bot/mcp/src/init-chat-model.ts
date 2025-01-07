@@ -34,16 +34,27 @@ export function initChatModel(config: ChatModelConfig): BaseChatModel {
         break;
 
       case 'anthropic':
-        model = new ChatAnthropic(llmConfig);
+        // Use the API key from config or environment
+        const anthropicApiKey = config.apiKey || process.env.ANTHROPIC_API_KEY;
+        if (!anthropicApiKey) {
+          throw new Error('ANTHROPIC_API_KEY not found in config or environment')
+        }
+        model = new ChatAnthropic({
+          ...llmConfig,
+          apiKey: anthropicApiKey
+        });
         break;
 
       case 'groq':
-        // somehow, the API key had to be set via the env variable,
-        // even though the constructor accepts `apiKey`
-        if (llmConfig.apiKey) {
-          process.env.GROQ_API_KEY = llmConfig.apiKey;
+        // Use the API key from config or environment
+        const groqApiKey = config.apiKey || process.env.GROQ_API_KEY;
+        if (!groqApiKey) {
+          throw new Error('GROQ_API_KEY not found in config or environment')
         }
-        model = new ChatGroq(llmConfig);
+        model = new ChatGroq({
+          ...llmConfig,
+          apiKey: groqApiKey
+        });
         break;
 
       default:
