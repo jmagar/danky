@@ -1,51 +1,53 @@
-import { MCPService } from '@/lib/services/mcp-service'
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
-// Singleton instance
-let mcpService: MCPService | null = null
-
-async function ensureService() {
-  if (!mcpService) {
-    mcpService = new MCPService({ logLevel: 'info' })
-    await mcpService.initialize()
+// Mock server data for development
+const servers = [
+  {
+    id: "1",
+    name: "Local Server",
+    status: "connected" as const,
+    tools: [
+      {
+        id: "1",
+        name: "Code Search",
+        description: "Search through your codebase"
+      },
+      {
+        id: "2",
+        name: "File Editor",
+        description: "Edit files in your workspace"
+      }
+    ]
   }
-  return mcpService
-}
+]
 
-export async function POST(req: Request) {
-  try {
-    const { message } = await req.json()
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      )
-    }
-
-    const service = await ensureService()
-    const response = await service.processMessage(message)
-    return NextResponse.json({ response })
-
-  } catch (error) {
-    console.error('Error processing message:', error)
-    return NextResponse.json(
-      { error: 'Failed to process message' },
-      { status: 500 }
-    )
-  }
-}
+const messageSchema = z.object({
+  message: z.string(),
+  sessionId: z.string()
+})
 
 export async function GET() {
+  return NextResponse.json({
+    status: "ready",
+    servers
+  })
+}
+
+export async function POST(request: Request) {
   try {
-    const service = await ensureService()
-    return NextResponse.json({ 
-      status: 'ready',
-      servers: service.getServerStatus()
+    const body = await request.json()
+    const { message, sessionId } = messageSchema.parse(body)
+    
+    // Mock response for development
+    return NextResponse.json({
+      response: `I received your message: "${message}" in session ${sessionId}`
     })
   } catch (error) {
+    console.error("Error processing message:", error)
     return NextResponse.json(
-      { error: 'Service not ready' },
-      { status: 500 }
+      { error: "Invalid request" },
+      { status: 400 }
     )
   }
 } 

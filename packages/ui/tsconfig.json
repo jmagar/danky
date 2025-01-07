@@ -18,6 +18,6 @@
     "src/**/*",
     "@danky/ui/**/*",
     "turbo/**/*"
-  ],
+, "../../apps/web/components/chat/chat-layout.tsx"  ],
   "exclude": ["node_modules", "dist"]
 }

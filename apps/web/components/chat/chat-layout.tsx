@@ -1,16 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "../../lib/utils"
+import { cn } from "@danky/ui/lib/utils"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../resizable"
-import { Button } from "../button"
-import { ScrollArea } from "../scroll-area"
+  Button,
+  ScrollArea,
+  Separator
+} from "@danky/ui"
 import { Mic, Settings, Plus, PanelLeftClose, PanelLeft, Bot } from "lucide-react"
-import { Separator } from "../separator"
 
 interface ChatLayoutProps {
   children?: React.ReactNode

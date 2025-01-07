@@ -1,9 +1,13 @@
 "use client"
 
-import * as React from "react"
-import { ThemeProvider } from "@danky/ui"
-import { Toaster } from "@danky/ui"
-import "@danky/ui/styles/globals.css"
+import { Noto_Sans } from "next/font/google"
+import { ThemeProvider } from "next-themes"
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+})
 
 export default function RootLayout({
   children,
@@ -12,11 +16,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <title>Danky AI Chat</title>
-        <meta name="description" content="A modern AI chatbot interface" />
-      </head>
-      <body>
+      <head />
+      <body className={`${notoSans.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -24,7 +25,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

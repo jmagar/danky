@@ -43,7 +43,7 @@ export * from './components/resizable'
 export * from './components/theme-toggle'
 
 // Chat components
-export * from "./components/chat/chat-layout"
+export * from "../../../apps/web/components/chat/chat-layout"
 export * from "./components/mcp/tools-button"
 
 // Hooks

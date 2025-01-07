@@ -1,260 +1,259 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import {
-  ChatLayout,
-  Card,
-  CardContent,
-  Button,
-  ScrollArea,
-  Textarea,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  ToolsButton,
-} from "@danky/ui"
-import { SendHorizontal } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { ScrollArea } from "@danky/ui"
+import { Message, ChatSession, Server } from "@/components/chat/types"
+import { ChatMessage } from "@/components/chat/message"
+import { ChatInput } from "@/components/chat/input"
+import { ToolsDropdown } from "@/components/chat/tools-dropdown"
+import { ThemeToggle } from "@/components/chat/theme-toggle"
+import { Sidebar } from "@/components/chat/sidebar"
+import { ChatLayout } from "@/components/chat/chat-layout"
 
-interface Message {
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-}
-
-interface ChatSession {
-  id: string
-  title: string
-  lastMessage: string
-  timestamp: Date
-}
-
-interface Server {
-  id: string
-  name: string
-  status: "connected" | "disconnected" | "error"
-  tools: Array<{
-    id: string
-    name: string
-    description: string
-  }>
-}
+const POLLING_INTERVAL = 5000 // 5 seconds
 
 export default function ChatPage() {
+  // State
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([
-    {
-      id: "1",
-      title: "General Chat",
-      lastMessage: "Hello! How can I help you today?",
-      timestamp: new Date(),
-    },
-  ])
+  const [currentSession, setCurrentSession] = useState<string | null>(null)
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
   const [servers, setServers] = useState<Server[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isAgentReady, setIsAgentReady] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
+  
+  // Refs
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const pollingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(setTimeout(() => {}, 0))
 
+  // Handle hydration
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Load chat sessions
+  useEffect(() => {
+    if (!mounted) return
+
+    const loadSessions = async () => {
+      try {
+        const res = await fetch('/api/chat/sessions')
+        if (!res.ok) throw new Error('Failed to load sessions')
+        const data = await res.json()
+        
+        const sessions = data.sessions?.map((session: any) => ({
+          ...session,
+          timestamp: new Date(session.timestamp)
+        })) || []
+
+        setChatSessions(sessions)
+        if (sessions.length > 0 && !currentSession) {
+          setCurrentSession(sessions[0].id)
+        }
+      } catch (error) {
+        console.error("Failed to load sessions:", error)
+        // Don't automatically create a session on error
+      }
+    }
+
+    loadSessions()
+  }, [mounted, currentSession])
+
+  // Load messages for current session
+  useEffect(() => {
+    if (!currentSession || !mounted) return
+
+    const loadSessionMessages = async () => {
+      try {
+        const res = await fetch(`/api/chat/sessions/${currentSession}/messages`)
+        if (!res.ok) throw new Error('Failed to load messages')
+        const data = await res.json()
+        setMessages(data.messages?.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        })) || [])
+      } catch (error) {
+        console.error("Failed to load session messages:", error)
+      }
+    }
+
+    loadSessionMessages()
+  }, [currentSession, mounted])
+
+  // Server status polling
   useEffect(() => {
     if (!mounted) return
 
     const checkAgentStatus = async () => {
       try {
         const res = await fetch("/api/chat")
+        if (!res.ok) throw new Error('Failed to check status')
         const data = await res.json()
         
-        if (data.status === "ready") {
-          setIsAgentReady(true)
-          setServers(Array.isArray(data.servers) ? data.servers : [])
-        } else {
-          setIsAgentReady(false)
-          setServers([])
-          // Retry after 5 seconds if not ready
-          setTimeout(checkAgentStatus, 5000)
-        }
+        setIsAgentReady(data.status === "ready")
+        setServers(data.servers || [])
       } catch (error) {
         console.error("Failed to check agent status:", error)
         setIsAgentReady(false)
         setServers([])
-        // Retry after 5 seconds on error
-        setTimeout(checkAgentStatus, 5000)
       }
+
+      pollingTimeoutRef.current = setTimeout(checkAgentStatus, POLLING_INTERVAL)
     }
 
     checkAgentStatus()
+    return () => {
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current)
+      }
+    }
   }, [mounted])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    }
+  }, [messages])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isLoading || !isAgentReady) return
+    if (!input.trim() || isLoading || !isAgentReady || !currentSession) return
 
     const userMessage: Message = { 
       role: "user", 
       content: input,
-      timestamp: new Date(),
+      timestamp: new Date()
     }
-    setMessages((prev) => [...prev, userMessage])
+
+    setMessages(prev => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          message: input,
+          sessionId: currentSession
+        }),
       })
 
+      if (!response.ok) throw new Error('Failed to send message')
       const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to process message")
-      }
 
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.response || "I apologize, but I encountered an error processing your message. Please try again.",
-        timestamp: new Date(),
+        content: data.response,
+        timestamp: new Date()
       }
-      setMessages((prev) => [...prev, assistantMessage])
+
+      setMessages(prev => [...prev, assistantMessage])
+      setChatSessions(prev => prev.map(session => 
+        session.id === currentSession 
+          ? { ...session, lastMessage: input, timestamp: new Date() }
+          : session
+      ))
     } catch (error) {
       console.error("Error processing message:", error)
       const errorMessage: Message = {
         role: "assistant",
-        content: error instanceof Error ? error.message : "I apologize, but I encountered an error processing your message. Please try again.",
-        timestamp: new Date(),
+        content: error instanceof Error ? error.message : "An error occurred while processing your message.",
+        timestamp: new Date()
       }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleNewChat = () => {
-    const newSession: ChatSession = {
-      id: Date.now().toString(),
-      title: "New Chat",
-      lastMessage: "Start a new conversation",
-      timestamp: new Date(),
+  const handleNewChat = async () => {
+    try {
+      const response = await fetch("/api/chat/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "New Chat",
+          lastMessage: "Start a new conversation"
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to create chat')
+      const data = await response.json()
+
+      const newSession: ChatSession = {
+        id: data.sessionId,
+        title: "New Chat",
+        lastMessage: "Start a new conversation",
+        timestamp: new Date()
+      }
+
+      setChatSessions(prev => [newSession, ...prev])
+      setCurrentSession(newSession.id)
+      setMessages([])
+    } catch (error) {
+      console.error("Failed to create new chat:", error)
     }
-    setChatSessions((prev) => [newSession, ...prev])
-    setMessages([])
   }
 
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat("en", {
-      hour: "numeric",
-      minute: "numeric",
-    }).format(date)
+  if (!mounted) {
+    return null
   }
 
   return (
-    <ChatLayout
-      sidebar={
-        <ScrollArea className="h-full">
-          <div className="space-y-2 p-2">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2"
-              onClick={handleNewChat}
-            >
-              New Chat
-            </Button>
-            {chatSessions.map((session) => (
-              <Card key={session.id} className="cursor-pointer hover:bg-accent">
-                <CardContent className="p-3">
-                  <h3 className="font-medium">{session.title}</h3>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {session.lastMessage}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+    <div className="flex h-screen overflow-hidden bg-background">
+      <Sidebar
+        sessions={chatSessions}
+        onNewChat={handleNewChat}
+        onSelectSession={(session) => setCurrentSession(session.id)}
+        currentSessionId={currentSession || ""}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center gap-4 px-4">
+            <div className="flex-1 flex items-center justify-end gap-2">
+              <ThemeToggle />
+              <ToolsDropdown
+                servers={servers}
+                onToolSelect={(serverId, toolId) => {
+                  console.log("Selected tool:", serverId, toolId)
+                }}
+                isLoading={!isAgentReady}
+              />
+            </div>
           </div>
-        </ScrollArea>
-      }
-      toolsButton={
-        mounted ? (
-          <ToolsButton
-            servers={servers}
-            onToolSelect={(serverId, toolId) => {
-              console.log("Selected tool:", serverId, toolId)
-            }}
-          />
-        ) : null
-      }
-    >
-      <div className="flex flex-col h-full">
-        <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-8 p-4">
+        </header>
+
+        <ScrollArea 
+          className="flex-1" 
+          ref={scrollAreaRef}
+        >
+          <div className="flex flex-col gap-2 p-4 pb-8">
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                <div className="flex items-start gap-4 max-w-[70%]">
-                  {message.role === "assistant" && (
-                    <Avatar>
-                      <AvatarImage src="/bot-avatar.png" />
-                      <AvatarFallback>AI</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="flex flex-col gap-2">
-                    <Card className={message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}>
-                      <CardContent className="p-4">
-                        {message.content}
-                      </CardContent>
-                    </Card>
-                    <span className="text-xs text-muted-foreground px-1">
-                      {formatTime(message.timestamp)}
-                    </span>
-                  </div>
-                  {message.role === "user" && (
-                    <Avatar>
-                      <AvatarImage src="/avatar.png" />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-              </div>
+              <ChatMessage key={index} message={message} />
             ))}
           </div>
         </ScrollArea>
 
-        <div className="border-t bg-background">
-          <div className="p-4">
-            <form onSubmit={handleSubmit} className="flex gap-4">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={!mounted ? "Loading..." : isAgentReady ? "Type your message..." : "Initializing..."}
-                className="min-h-[60px]"
-                disabled={!mounted || !isAgentReady}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
-                  }
-                }}
-              />
-              <Button 
-                type="submit" 
-                size="icon" 
-                disabled={!mounted || !input.trim() || isLoading || !isAgentReady}
-              >
-                <SendHorizontal className="h-4 w-4" />
-              </Button>
-            </form>
+        <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="mx-auto max-w-3xl p-4">
+            <ChatInput
+              value={input}
+              onChange={setInput}
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+              isDisabled={!isAgentReady || !currentSession}
+              placeholder={!isAgentReady ? "Initializing..." : "Type your message..."}
+            />
           </div>
         </div>
-      </div>
-    </ChatLayout>
+      </main>
+    </div>
   )
 }
