@@ -9,12 +9,21 @@ import { ChatLayout } from '@/components/chat/chat-layout'
 import { Sidebar } from '@/components/chat/sidebar'
 import { type ChatSession, type Server } from '@/components/chat/types'
 
+// Mock data for models - replace with real data later
+const mockModels = [
+  { id: 'gpt-4', name: 'GPT-4', isFavorite: true },
+  { id: 'gpt-3.5', name: 'GPT-3.5', isFavorite: true },
+  { id: 'claude-2', name: 'Claude 2', isFavorite: false },
+  { id: 'llama-2', name: 'Llama 2', isFavorite: false },
+]
+
 export default function ChatPage() {
   const { messages, isInitializing, isProcessing, error, initialize } = useChatStore()
-  const [isOpen, setIsOpen] = useState(true)
   const [currentSessionId, setCurrentSessionId] = useState('')
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [servers, setServers] = useState<Server[]>([])
+  const [currentModel, setCurrentModel] = useState('gpt-4')
+  const [models, setModels] = useState(mockModels)
 
   useEffect(() => {
     void initialize();
@@ -30,6 +39,18 @@ export default function ChatPage() {
 
   const handleToolSelect = (serverId: string, toolId: string) => {
     // TODO: Implement tool selection
+  }
+
+  const handleModelSelect = (modelId: string) => {
+    setCurrentModel(modelId)
+  }
+
+  const handleToggleFavorite = (modelId: string) => {
+    setModels(models.map(model => 
+      model.id === modelId 
+        ? { ...model, isFavorite: !model.isFavorite }
+        : model
+    ))
   }
 
   if (isInitializing) {
@@ -53,12 +74,15 @@ export default function ChatPage() {
       <ChatLayout
         sidebar={
           <Sidebar
-            sessions={sessions}
-            onNewChat={handleNewChat}
-            onSelectSession={handleSelectSession}
-            currentSessionId={currentSessionId}
-            isOpen={isOpen}
-            _onToggle={() => setIsOpen(!isOpen)}
+            models={models}
+            currentModel={currentModel}
+            onModelSelect={handleModelSelect}
+            onToggleFavorite={handleToggleFavorite}
+            user={{
+              name: "John Doe",
+              email: "john@example.com",
+              isAdmin: true,
+            }}
           />
         }
       >
