@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@langchain/anthropic':
+        specifier: ^0.3.11
+        version: 0.3.11(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
+      '@langchain/langgraph':
+        specifier: ^0.2.36
+        version: 0.2.39(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
+      '@langchain/openai':
+        specifier: ^0.3.16
+        version: 0.3.16(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
       zustand:
         specifier: 5.0.2
         version: 5.0.2(@types/react@19.0.2)(react@19.0.0)
@@ -15,6 +24,15 @@ importers:
       '@danky/typescript-config':
         specifier: workspace:*
         version: link:packages/typescript-config
+      '@h1deya/mcp-langchain-tools':
+        specifier: 0.0.9
+        version: 0.0.9(openai@4.77.3(zod@3.24.1))
+      '@langchain/core':
+        specifier: 0.3.27
+        version: 0.3.27(openai@4.77.3(zod@3.24.1))
+      '@modelcontextprotocol/sdk':
+        specifier: 1.1.0
+        version: 1.1.0
       '@modelcontextprotocol/server-brave-search':
         specifier: 0.6.2
         version: 0.6.2
@@ -24,6 +42,12 @@ importers:
       '@turbo/gen':
         specifier: 2.3.3
         version: 2.3.3(@types/node@20.17.6)(typescript@5.7.2)
+      '@types/content-type':
+        specifier: 1.1.8
+        version: 1.1.8
+      '@types/raw-body':
+        specifier: 2.3.0
+        version: 2.3.0
       '@types/react-syntax-highlighter':
         specifier: 15.5.13
         version: 15.5.13
@@ -111,85 +135,6 @@ importers:
         version: 4.19.2
       typescript:
         specifier: ^5.7.2
-        version: 5.7.2
-
-  apps/web:
-    dependencies:
-      '@danky/mcp':
-        specifier: workspace:*
-        version: link:../../packages/mcp
-      '@danky/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@langchain/anthropic':
-        specifier: ^0.3.11
-        version: 0.3.11(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
-      '@langchain/community':
-        specifier: ^0.3.20
-        version: 0.3.22(@browserbasehq/sdk@2.0.0)(@browserbasehq/stagehand@1.8.0(@playwright/test@1.49.1)(deepmerge@4.3.1)(dotenv@16.4.7)(openai@4.77.3(zod@3.24.1))(zod@3.24.1))(@ibm-cloud/watsonx-ai@1.3.0)(@langchain/anthropic@0.3.11(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1))))(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))(@langchain/groq@0.1.2(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1))))(axios@1.7.4)(fast-xml-parser@4.5.1)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.1.0)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.77.3(zod@3.24.1))(playwright@1.49.1)(ws@8.18.0)
-      '@langchain/core':
-        specifier: ^0.3.26
-        version: 0.3.27(openai@4.77.3(zod@3.24.1))
-      '@langchain/groq':
-        specifier: ^0.1.2
-        version: 0.1.2(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
-      '@langchain/langgraph':
-        specifier: ^0.2.36
-        version: 0.2.39(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
-      '@langchain/openai':
-        specifier: ^0.3.16
-        version: 0.3.16(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.0.4
-        version: 1.1.0
-      lucide-react:
-        specifier: ^0.323.0
-        version: 0.323.0(react@19.0.0)
-      next:
-        specifier: 15.1.3
-        version: 15.1.3(@playwright/test@1.49.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      next-themes:
-        specifier: ^0.2.1
-        version: 0.2.1(next@15.1.3(@playwright/test@1.49.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react:
-        specifier: ^19.0.0
-        version: 19.0.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.0.0(react@19.0.0)
-    devDependencies:
-      '@danky/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@danky/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
-      '@types/node':
-        specifier: ^20
-        version: 20.17.6
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.0.2
-      '@types/react-dom':
-        specifier: ^19.0.0
-        version: 19.0.2(@types/react@19.0.2)
-      autoprefixer:
-        specifier: ^10.0.1
-        version: 10.4.20(postcss@8.4.49)
-      eslint:
-        specifier: ^9.0.0
-        version: 9.17.0(jiti@1.21.7)
-      kill-port:
-        specifier: 2.0.1
-        version: 2.0.1
-      postcss:
-        specifier: ^8
-        version: 8.4.49
-      tailwindcss:
-        specifier: ^3.3.0
-        version: 3.4.17(ts-node@10.9.2(@types/node@20.17.6)(typescript@5.7.2))
-      typescript:
-        specifier: ^5.3.3
         version: 5.7.2
 
   packages/eslint-config:
@@ -698,6 +643,9 @@ packages:
 
   '@floating-ui/utils@0.2.8':
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
+
+  '@h1deya/mcp-langchain-tools@0.0.9':
+    resolution: {integrity: sha512-begxzx7GD+sx5OTuC5ybRabOfQx3Co5jucW/GYyqgBo8h2JTb1JGw7OdeGdyzf6kiexEz+9BsZv4aAan2r1txQ==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2091,6 +2039,9 @@ packages:
     resolution: {integrity: sha512-PSys7Hy5NuX76HBleOkd8wlRtI4GCzLHS2XUpKeGIj0vpzH4fqE+tpi7fBb5t9U7UiyM6E6pyabSKjoD2zUsoQ==}
     hasBin: true
 
+  '@types/content-type@1.1.8':
+    resolution: {integrity: sha512-1tBhmVUeso3+ahfyaKluXe38p+94lovUZdoVfQ3OnJo9uJC42JT7CBoN3k9HYhAae+GwiBYmHu+N9FZhOG+2Pg==}
+
   '@types/d3-array@3.2.1':
     resolution: {integrity: sha512-Y2Jn2idRrLzUfAKV2LyRImR+y4oa2AntrgID95SHJxuMUrkNXmanDSed71sRNZysveJVt1hLLemQZIady0FpEg==}
 
@@ -2153,6 +2104,10 @@ packages:
 
   '@types/node@20.17.6':
     resolution: {integrity: sha512-VEI7OdvK2wP7XHnsuXbAJnEpEkF6NjSN45QJlL4VGqZSXsnicpesdTWsg9RISeSdYd3yeRj/y3k5KGjUXYnFwQ==}
+
+  '@types/raw-body@2.3.0':
+    resolution: {integrity: sha512-O6RrhgBmUATx9NfxOarftVIG6Vw64T3JNF26iIR5XVl037Hh5M4gqUQtYtBmEkWJdzEZXd0TevSvSneuh9Snmw==}
+    deprecated: This is a stub types definition for raw-body (https://github.com/stream-utils/raw-body). raw-body provides its own type definitions, so you don't need @types/raw-body installed!
 
   '@types/react-dom@19.0.2':
     resolution: {integrity: sha512-c1s+7TKFaDRRxr1TxccIX2u7sfCnc3RxkVyBIUA2lCpyqCF+QoAwQ/CBg7bsMdVwP120HEH143VQezKtef5nCg==}
@@ -3130,9 +3085,6 @@ packages:
     resolution: {integrity: sha512-w9UMqWwJxHNOvoNzSJ2oPF5wvYcvP7jUvYzhp67yEhTi17ZDBBC1z9pTdGuzjD+EFIqLSYRweZjqfiPzQ06Ebg==}
     engines: {node: '>= 0.4'}
 
-  get-them-args@1.3.2:
-    resolution: {integrity: sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==}
-
   get-tsconfig@4.8.1:
     resolution: {integrity: sha512-k9PN+cFBmaLWtVz29SkUoqU5O0slLuHJXt/2P+tMVFT+phsSGXGkp9t3rQIqdz0e+06EHNGs3oM6ZX1s2zHxRg==}
 
@@ -3549,10 +3501,6 @@ packages:
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
-
-  kill-port@2.0.1:
-    resolution: {integrity: sha512-e0SVOV5jFo0mx8r7bS29maVWp17qGqLBZ5ricNSajON6//kmb7qqqNnml4twNE8Dtj97UQD+gNFOaipS/q1zzQ==}
-    hasBin: true
 
   langchain@0.3.9:
     resolution: {integrity: sha512-uteRutI03Bt9f53nZmx8mWfJXkf6VlFVRuOprRJ0mWdCpkTP359sxrH4v6w4TokLiziPC/aMay662kmOz0dHlA==}
@@ -4373,9 +4321,6 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-exec@1.0.2:
-    resolution: {integrity: sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==}
-
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
     engines: {node: '>= 0.4'}
@@ -5124,6 +5069,15 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
 
   '@floating-ui/utils@0.2.8': {}
+
+  '@h1deya/mcp-langchain-tools@0.0.9(openai@4.77.3(zod@3.24.1))':
+    dependencies:
+      '@langchain/core': 0.3.27(openai@4.77.3(zod@3.24.1))
+      '@modelcontextprotocol/sdk': 1.1.0
+      '@n8n/json-schema-to-zod': 1.1.0(zod@3.24.1)
+      zod: 3.24.1
+    transitivePeerDependencies:
+      - openai
 
   '@humanfs/core@0.19.1': {}
 
@@ -6267,6 +6221,8 @@ snapshots:
       semver: 7.6.2
       update-check: 1.5.4
 
+  '@types/content-type@1.1.8': {}
+
   '@types/d3-array@3.2.1': {}
 
   '@types/d3-color@3.1.3': {}
@@ -6331,6 +6287,10 @@ snapshots:
   '@types/node@20.17.6':
     dependencies:
       undici-types: 6.19.8
+
+  '@types/raw-body@2.3.0':
+    dependencies:
+      raw-body: 3.0.0
 
   '@types/react-dom@19.0.2(@types/react@19.0.2)':
     dependencies:
@@ -7503,8 +7463,6 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.2.7
 
-  get-them-args@1.3.2: {}
-
   get-tsconfig@4.8.1:
     dependencies:
       resolve-pkg-maps: 1.0.0
@@ -8008,11 +7966,6 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
-
-  kill-port@2.0.1:
-    dependencies:
-      get-them-args: 1.3.2
-      shell-exec: 1.0.2
 
   langchain@0.3.9(@langchain/anthropic@0.3.11(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1))))(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1)))(@langchain/groq@0.1.2(@langchain/core@0.3.27(openai@4.77.3(zod@3.24.1))))(axios@1.7.4)(handlebars@4.7.8)(openai@4.77.3(zod@3.24.1)):
     dependencies:
@@ -8856,8 +8809,6 @@ snapshots:
       shebang-regex: 3.0.0
 
   shebang-regex@3.0.0: {}
-
-  shell-exec@1.0.2: {}
 
   side-channel-list@1.0.0:
     dependencies:

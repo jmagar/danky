@@ -2,6 +2,8 @@
 
 import { Noto_Sans } from "next/font/google"
 import { ThemeProvider } from "next-themes"
+import { cn } from "@danky/ui"
+import "./globals.css"
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -17,7 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body className={`${notoSans.variable} font-sans antialiased`}>
+      <body 
+        className={cn(
+          notoSans.variable,
+          "font-sans antialiased min-h-screen bg-background",
+          "flex flex-col overflow-hidden"
+        )}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

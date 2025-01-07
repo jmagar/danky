@@ -1,16 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@danky/ui/lib/utils"
+import { cn } from "@danky/ui"
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
   Button,
   ScrollArea,
-  Separator
 } from "@danky/ui"
-import { Mic, Settings, Plus, PanelLeftClose, PanelLeft, Bot } from "lucide-react"
+import { Bot, PanelLeft, PanelLeftClose } from "lucide-react"
 
 interface ChatLayoutProps {
   children?: React.ReactNode
@@ -28,10 +27,10 @@ export function ChatLayout({
   const [isCollapsed, setIsCollapsed] = React.useState(false)
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
+    <div className="fixed inset-0">
       <ResizablePanelGroup
         direction="horizontal"
-        className="w-full"
+        className="h-full"
       >
         <ResizablePanel
           defaultSize={15}
@@ -42,63 +41,45 @@ export function ChatLayout({
           onCollapse={() => setIsCollapsed(true)}
           onExpand={() => setIsCollapsed(false)}
           className={cn(
-            "bg-background/50",
+            "bg-background border-r",
             isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out"
           )}
         >
-          <div className="flex h-[52px] items-center justify-between px-4 py-2">
-            <div className="flex items-center gap-2">
-              {!isCollapsed && (
-                <>
-                  <Button variant="ghost" size="icon">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              {isCollapsed ? (
-                <PanelLeft className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-          <Separator />
-          <ScrollArea className="h-[calc(100dvh-53px)]">
+          <ScrollArea className="h-full">
             {sidebar}
           </ScrollArea>
         </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={85} className="relative">
+        <ResizableHandle withHandle className="w-[2px] bg-border" />
+        <ResizablePanel defaultSize={85} className="bg-background">
           <div className="flex h-full flex-col">
-            <div className="flex h-[52px] items-center justify-center border-b bg-background/50">
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <h1 className="text-xl font-semibold tracking-tight">DANKY</h1>
+            <div className="flex h-14 items-center border-b">
+              <div className="flex w-full items-center px-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="md:hidden"
+                  >
+                    {isCollapsed ? (
+                      <PanelLeft className="h-4 w-4" />
+                    ) : (
+                      <PanelLeftClose className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Toggle sidebar</span>
+                  </Button>
+                </div>
+                <div className="flex flex-1 items-center justify-center gap-2">
+                  <Bot className="h-5 w-5 text-primary" />
+                  <h1 className="text-xl font-semibold tracking-tight">DANKY</h1>
+                </div>
+              </div>
+              <div className="flex min-w-[240px] items-center justify-end px-4">
+                {toolsButton}
               </div>
             </div>
             <div className="flex-1 overflow-auto">
               {children}
-            </div>
-            <Separator />
-            <div className="relative bg-background/50 px-4 py-2">
-              {toolsButton || (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="absolute bottom-4 right-8"
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
-              )}
             </div>
           </div>
         </ResizablePanel>

@@ -8,10 +8,10 @@ import {
   DropdownMenuSeparator,
   Button,
   Badge,
+  cn
 } from "@danky/ui"
 import { Server } from "./types"
 import { Wrench, CircleDot, Loader2, AlertCircle } from "lucide-react"
-import { cn } from "@danky/ui/lib/utils"
 
 interface ToolsDropdownProps {
   servers: Server[]

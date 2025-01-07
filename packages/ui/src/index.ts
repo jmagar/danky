@@ -42,10 +42,6 @@ export * from './components/tooltip'
 export * from './components/resizable'
 export * from './components/theme-toggle'
 
-// Chat components
-export * from "../../../apps/web/components/chat/chat-layout"
-export * from "./components/mcp/tools-button"
-
 // Hooks
 export * from './hooks/use-toast'
 export * from './hooks/use-mobile'

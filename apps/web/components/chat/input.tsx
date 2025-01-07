@@ -1,13 +1,10 @@
 "use client"
 
-import { Button, Textarea } from "@danky/ui"
+import { Button, Textarea, cn } from "@danky/ui"
 import { SendHorizontal, Loader2 } from "lucide-react"
-import { cn } from "@danky/ui/lib/utils"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 
 interface ChatInputProps {
-  value: string
-  onChange: (value: string) => void
   onSubmit: (e: React.FormEvent) => void
   isLoading?: boolean
   isDisabled?: boolean
@@ -15,65 +12,66 @@ interface ChatInputProps {
 }
 
 export function ChatInput({
-  value,
-  onChange,
   onSubmit,
   isLoading = false,
   isDisabled = false,
   placeholder = "Type your message..."
 }: ChatInputProps) {
+  const [input, setInput] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-resize textarea
   useEffect(() => {
-    const textarea = textareaRef.current
-    if (!textarea) return
-
-    const adjustHeight = () => {
-      textarea.style.height = "0"
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "0px"
+      const scrollHeight = textareaRef.current.scrollHeight
+      textareaRef.current.style.height = scrollHeight + "px"
     }
+  }, [input])
 
-    textarea.addEventListener("input", adjustHeight)
-    adjustHeight()
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isDisabled || isLoading) return
+    onSubmit(e)
+    setInput("")
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "48px"
+    }
+  }
 
-    return () => textarea.removeEventListener("input", adjustHeight)
-  }, [value])
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e)
+    }
+  }
 
   return (
-    <form 
-      onSubmit={onSubmit} 
-      className="relative flex items-end"
-    >
+    <form onSubmit={handleSubmit} className="relative">
       <Textarea
         ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={cn(
-          "pr-12 min-h-[52px] max-h-[200px] resize-none rounded-lg",
-          "focus-visible:ring-1 focus-visible:ring-offset-0",
-          "scrollbar-thin scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20",
-          isDisabled && "opacity-50"
-        )}
         disabled={isDisabled}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            onSubmit(e)
-          }
-        }}
+        className={cn(
+          "min-h-[48px] w-full resize-none rounded-lg pr-12",
+          "focus-visible:ring-1 focus-visible:ring-offset-0",
+          isDisabled && "opacity-50 cursor-not-allowed"
+        )}
+        rows={1}
       />
-      <Button 
+      <Button
         type="submit"
         size="icon"
-        variant="ghost"
+        disabled={isDisabled || isLoading || !input.trim()}
         className={cn(
-          "absolute right-2 bottom-2 h-8 w-8",
-          "transition-opacity duration-200",
-          (!value.trim() || isDisabled) && "opacity-0"
+          "absolute right-1 top-1 h-[34px] w-[34px]",
+          "bg-primary hover:bg-primary/90",
+          "text-primary-foreground",
+          "transition-opacity",
+          (!input.trim() || isDisabled) && "opacity-50"
         )}
-        disabled={isDisabled || !value.trim() || isLoading}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
