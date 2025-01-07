@@ -11,12 +11,17 @@ import readline from 'readline';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import dotenv from 'dotenv';
+import path from 'path';
+
+// Get current file URL and convert to path
+const __filename = new URL(import.meta.url).pathname;
+const __dirname = path.dirname(__filename);
 
 // Initialize environment variables
-dotenv.config({ path: '../../../.env' });
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
 // Constants
-const DEFAULT_CONFIG_PATH = '../../../mcp-config.json5';
+const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '../../../../mcp-config.json5');
 
 const SAMPLE_QUERIES = [
   'Whats the weather like in SF?',
@@ -36,20 +41,6 @@ interface Arguments {
   config: string;
   [key: string]: unknown;
 }
-
-const parseArguments = (): Arguments => {
-  return yargs(hideBin(process.argv))
-    .options({
-      config: {
-        type: 'string',
-        description: 'Path to config file',
-        demandOption: false
-      },
-    })
-    .help()
-    .alias('help', 'h')
-    .parseSync() as Arguments;
-};
 
 // Input handling
 const createReadlineInterface = () => {
@@ -89,6 +80,20 @@ async function getUserQuery(
 
   return query;
 }
+
+const parseArguments = (): Arguments => {
+  return yargs(hideBin(process.argv))
+    .options({
+      config: {
+        type: 'string',
+        description: 'Path to config file',
+        default: DEFAULT_CONFIG_PATH
+      }
+    })
+    .help()
+    .alias('help', 'h')
+    .parseSync() as Arguments;
+};
 
 // Conversation loop
 async function handleConversation(

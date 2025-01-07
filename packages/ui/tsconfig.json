@@ -1,23 +1,24 @@
 {
   "extends": "@danky/typescript-config/react-library.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@danky/ui/*": ["./src/*"],
-      "@danky/lib/utils": ["./src/lib/utils"]
+      "@/*": ["./src/*"]
     },
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "target": "es2018",
-    "outDir": "./dist",
-    "rootDir": "."
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationDir": "./dist",
+    "types": ["react", "react-dom"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "include": [
-    "src/**/*",
-    "@danky/ui/**/*",
-    "turbo/**/*"
-  ],
+  "include": ["src", "tsup.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

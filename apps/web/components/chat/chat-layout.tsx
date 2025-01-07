@@ -15,14 +15,14 @@ interface ChatLayoutProps {
   children?: React.ReactNode
   sidebar?: React.ReactNode
   toolsButton?: React.ReactNode
-  className?: string
+  _className?: string
 }
 
 export function ChatLayout({
   children,
   sidebar,
   toolsButton,
-  className,
+  _className,
 }: ChatLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
 

@@ -1,111 +1,84 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { z } from 'zod'
 
-// Message store (temporary until we implement proper storage)
-const messagesBySession: Record<string, Array<{
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-}>> = {}
-
-// Initialize with some test data
-messagesBySession["1"] = [
+// Mock data for development
+const messages = [
   {
-    id: crypto.randomUUID(),
-    role: "assistant",
-    content: "Hello! How can I help you today?",
-    timestamp: new Date()
+    id: "1",
+    content: "Hello!",
+    role: "user",
+    timestamp: new Date().toISOString()
   }
 ]
 
-// Validate session ID
-const paramsSchema = z.object({
-  sessionId: z.string().min(1)
+const sessionParamsSchema = z.object({
+  sessionId: z.string()
 })
 
-// Validate message data
-const messageSchema = z.object({
-  role: z.enum(["user", "assistant"]),
-  content: z.string().min(1)
-})
+type RouteContext = {
+  params: Promise<{ sessionId: string }>
+}
 
 export async function GET(
   request: Request,
-  { params }: { params: { sessionId: string } }
-) {
+  context: RouteContext
+): Promise<Response> {
   try {
-    // Validate params
-    const { sessionId } = paramsSchema.parse(params)
+    const { sessionId } = await context.params
+    sessionParamsSchema.parse({ sessionId })
     
-    // Get messages for session
-    const messages = messagesBySession[sessionId] || []
-    
-    return NextResponse.json({ 
-      messages: messages.map(msg => ({
-        ...msg,
-        timestamp: msg.timestamp.toISOString()
-      }))
-    })
+    // Mock response for development
+    return Response.json({ messages })
   } catch (error) {
-    console.error('Error fetching messages:', error)
+    console.error("Error fetching messages:", error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid session ID' }, 
+      return Response.json(
+        { error: "Invalid session ID", details: error.errors },
         { status: 400 }
       )
     }
-    return NextResponse.json(
-      { error: 'Failed to fetch messages' },
+    return Response.json(
+      { error: "Failed to fetch messages" },
       { status: 500 }
     )
   }
 }
 
+const messageSchema = z.object({
+  content: z.string(),
+  role: z.enum(["user", "assistant"])
+})
+
 export async function POST(
   request: Request,
-  { params }: { params: { sessionId: string } }
-) {
+  context: RouteContext
+): Promise<Response> {
   try {
-    // Validate params
-    const { sessionId } = paramsSchema.parse(params)
+    const { sessionId } = await context.params
+    sessionParamsSchema.parse({ sessionId })
     
-    // Validate request body
     const body = await request.json()
     const message = messageSchema.parse(body)
     
-    // Initialize session messages if needed
-    if (!messagesBySession[sessionId]) {
-      messagesBySession[sessionId] = []
-    }
-    
-    // Create new message with ID and timestamp
-    const newMessage = {
-      ...message,
-      id: crypto.randomUUID(),
-      timestamp: new Date()
-    }
-    
-    // Add message
-    messagesBySession[sessionId].push(newMessage)
-    
-    return NextResponse.json({ 
+    // Mock response for development
+    return Response.json({
       message: {
-        ...newMessage,
-        timestamp: newMessage.timestamp.toISOString()
+        ...message,
+        id: Math.random().toString(),
+        timestamp: new Date().toISOString()
       }
     })
   } catch (error) {
-    console.error('Error adding message:', error)
+    console.error("Error adding message:", error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid message data', details: error.errors }, 
+      return Response.json(
+        { error: "Invalid message", details: error.errors },
         { status: 400 }
       )
     }
-    return NextResponse.json(
-      { error: 'Failed to add message' },
+    return Response.json(
+      { error: "Failed to add message" },
       { status: 500 }
     )
   }
-} 
+}

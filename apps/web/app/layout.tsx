@@ -1,8 +1,7 @@
-"use client"
-
 import { Noto_Sans } from "next/font/google"
-import { ThemeProvider } from "next-themes"
+import { Metadata, Viewport } from "next"
 import { cn } from "@danky/ui"
+import { Providers } from "../components/providers"
 import "./globals.css"
 
 const notoSans = Noto_Sans({
@@ -10,6 +9,16 @@ const notoSans = Noto_Sans({
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
 })
+
+export const metadata: Metadata = {
+  title: 'Danky',
+  description: 'AI-powered chat interface',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export default function RootLayout({
   children,
@@ -26,14 +35,9 @@ export default function RootLayout({
           "flex flex-col overflow-hidden"
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           {children}
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )

@@ -1,8 +1,8 @@
 "use client"
 
 import { Button, cn } from "@danky/ui"
-import { ChatSession } from "./types"
-import { ChevronLeft, MessageSquare, Plus } from "lucide-react"
+import { type ChatSession } from "./types"
+import { MessageSquare, Plus } from "lucide-react"
 
 interface SidebarProps {
   sessions: ChatSession[]
@@ -10,7 +10,7 @@ interface SidebarProps {
   onSelectSession: (session: ChatSession) => void
   currentSessionId: string
   isOpen: boolean
-  onToggle: () => void
+  _onToggle: () => void
 }
 
 export function Sidebar({
@@ -19,7 +19,7 @@ export function Sidebar({
   onSelectSession,
   currentSessionId,
   isOpen,
-  onToggle
+  _onToggle
 }: SidebarProps) {
   return (
     <div className="flex flex-col h-full">

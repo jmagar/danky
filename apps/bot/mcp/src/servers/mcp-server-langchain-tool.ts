@@ -5,9 +5,13 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { CallToolResultSchema, ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { jsonSchemaToZod, type JsonSchema } from '@n8n/json-schema-to-zod';
+import type { JsonSchema } from '@n8n/json-schema-to-zod';
 import type { z } from 'zod';
 import { Logger } from '../logger.js';
+import { type LogLevelString } from '../logger.js';
+
+// Import jsonSchemaToZod using require
+const { jsonSchemaToZod } = require('@n8n/json-schema-to-zod/dist/cjs/index.js');
 
 interface MCPServerConfig {
   command: string;

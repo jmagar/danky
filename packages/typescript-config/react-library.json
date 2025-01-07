@@ -7,6 +7,20 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "target": "es6",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "types": ["react", "react-dom"],
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipDefaultLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }

@@ -1,66 +1,67 @@
 'use server'
 
-import { z } from 'zod'
-import { MCPService } from '@/lib/services/mcp-service'
+import { MCPService } from '@danky/mcp'
 
-// Singleton instance of MCPService
 let mcpService: MCPService | null = null
 
-// Initialize MCP service if not already initialized
-async function ensureInitialized() {
+async function getMCPService() {
   if (!mcpService) {
-    mcpService = new MCPService({ logLevel: 'debug' })
+    mcpService = new MCPService()
     await mcpService.initialize()
   }
   return mcpService
 }
 
-// Schema for message processing
-const messageSchema = z.object({
-  message: z.string().min(1),
-})
-
-export async function processMessage(data: z.infer<typeof messageSchema>) {
+export async function initialize() {
   try {
-    const validated = messageSchema.parse(data)
-    const service = await ensureInitialized()
-    return { success: true, response: await service.processMessage(validated.message) }
+    const service = await getMCPService()
+    return { success: true }
   } catch (error) {
-    console.error('Error processing message:', error)
-    return { success: false, error: 'Failed to process message' }
+    console.error('Failed to initialize MCP service:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 }
 
-export async function getServerStatus() {
+export async function getStatus() {
   try {
-    const service = await ensureInitialized()
-    return { success: true, status: service.getServerStatus() }
+    const service = await getMCPService()
+    return { success: true, status: { isInitialized: true } }
   } catch (error) {
-    console.error('Error getting server status:', error)
-    return { success: false, error: 'Failed to get server status' }
+    console.error('Failed to get MCP service status:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 }
 
-export async function getAvailableTools() {
+export async function getTools() {
   try {
-    const service = await ensureInitialized()
-    return { success: true, tools: service.getAvailableTools() }
+    const service = await getMCPService()
+    return { success: true, tools: [] }
   } catch (error) {
-    console.error('Error getting available tools:', error)
-    return { success: false, error: 'Failed to get available tools' }
+    console.error('Failed to get MCP tools:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 }
 
-export async function shutdownMCP() {
+export async function processMessage(message: string) {
+  try {
+    const service = await getMCPService()
+    const response = await service.processMessage(message)
+    return { success: true, response }
+  } catch (error) {
+    console.error('Failed to process message:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
+  }
+}
+
+export async function shutdown() {
   try {
     if (mcpService) {
       await mcpService.shutdown()
       mcpService = null
-      return { success: true }
     }
-    return { success: true, message: 'Service not running' }
+    return { success: true }
   } catch (error) {
-    console.error('Error shutting down MCP:', error)
-    return { success: false, error: 'Failed to shutdown MCP' }
+    console.error('Failed to shutdown MCP service:', error)
+    return { success: false, error: error instanceof Error ? error.message : String(error) }
   }
 } 

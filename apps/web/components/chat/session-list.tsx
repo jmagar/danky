@@ -1,7 +1,7 @@
 "use client"
 
-import { ScrollArea, Card, CardContent, cn } from "@danky/ui"
-import { ChatSession } from "./types"
+import { ScrollArea, cn } from "@danky/ui"
+import { type ChatSession } from "./types"
 import { MessageSquare } from "lucide-react"
 
 interface ChatSessionListProps {

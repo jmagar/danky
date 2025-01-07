@@ -10,7 +10,7 @@ import {
   Badge,
   cn
 } from "@danky/ui"
-import { Server } from "./types"
+import { type Server } from "./types"
 import { Wrench, CircleDot, Loader2, AlertCircle } from "lucide-react"
 
 interface ToolsDropdownProps {

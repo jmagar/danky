@@ -1,12 +1,12 @@
 import { ChatOpenAI } from '@langchain/openai'
 import { ChatAnthropic } from '@langchain/anthropic'
 import { ChatGroq } from '@langchain/groq'
-import { BaseChatModel } from '@langchain/core/language_models/chat_models'
+import { type BaseChatModel } from '@langchain/core/language_models/chat_models'
 
 type LLMConfig = {
   provider: 'openai' | 'anthropic' | 'groq'
   model: string
-  apiKey: string
+  apiKey?: string
   temperature?: number
   maxTokens?: number
 }
@@ -23,9 +23,14 @@ export function initChatModel(config: LLMConfig): BaseChatModel {
         maxTokens,
       })
     case 'anthropic':
+      // Use provided API key or fall back to environment variable
+      const anthropicApiKey = apiKey || process.env.ANTHROPIC_API_KEY
+      if (!anthropicApiKey) {
+        throw new Error('Anthropic API key not found in config or environment')
+      }
       return new ChatAnthropic({
         modelName: model,
-        anthropicApiKey: apiKey,
+        anthropicApiKey,
         temperature,
         maxTokens,
       })

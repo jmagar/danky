@@ -30,7 +30,7 @@ const LOG_LEVEL_MAP: Record<LogLevelString, LogLevel> = {
   fatal: LogLevel.FATAL
 } as const;
 
-class Logger {
+export class Logger {
   private readonly level: LogLevel;
   private static readonly RESET = '\x1b[0m';
 
@@ -70,5 +70,13 @@ class Logger {
   fatal = this.createLogMethod(LogLevel.FATAL);
 }
 
-export { Logger, LogLevel };
+export interface LoggerOptions {
+  level?: LogLevelString | LogLevel;
+}
+
+export function createLogger(options: LoggerOptions = {}): Logger {
+  return new Logger(options);
+}
+
+export { LogLevel };
 export type { LogLevelString };

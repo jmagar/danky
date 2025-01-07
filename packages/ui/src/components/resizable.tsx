@@ -7,68 +7,46 @@ import {
   PanelResizeHandle,
   type ImperativePanelGroupHandle,
   type ImperativePanelHandle,
+  type PanelGroupProps,
   type PanelProps,
   type PanelResizeHandleProps,
-  type PanelGroupProps,
 } from "react-resizable-panels"
+
 import { cn } from "../lib/utils"
 
-interface ResizablePanelGroupProps extends PanelGroupProps {
-  className?: string
-}
-
-interface ResizablePanelProps extends Omit<PanelProps, 'onCollapse'> {
-  className?: string
-  collapsed?: boolean
-  onCollapse?: (collapsed: boolean) => void
-}
-
-interface ResizableHandleProps extends Omit<PanelResizeHandleProps, 'children'> {
-  className?: string
-  withHandle?: boolean
-}
-
-const ResizablePanelGroup = React.forwardRef<ImperativePanelGroupHandle, ResizablePanelGroupProps>(
-  ({ className, ...props }, ref) => (
+const ResizablePanelGroup: React.FC<
+  PanelGroupProps & { className?: string }
+> = React.forwardRef<ImperativePanelGroupHandle, PanelGroupProps>(
+  (props, ref) => (
     <PanelGroup
       ref={ref}
+      {...props}
       className={cn(
         "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-        className
+        props.className
       )}
-      {...props}
     />
   )
 )
 ResizablePanelGroup.displayName = "ResizablePanelGroup"
 
-const ResizablePanel = React.forwardRef<ImperativePanelHandle, ResizablePanelProps>(
-  ({ className, collapsed, onCollapse, ...props }, ref) => {
-    const [isCollapsed, setIsCollapsed] = React.useState(collapsed)
-
-    React.useEffect(() => {
-      setIsCollapsed(collapsed)
-    }, [collapsed])
-
-    const handleCollapse = React.useCallback(() => {
-      const newCollapsed = !isCollapsed
-      setIsCollapsed(newCollapsed)
-      onCollapse?.(newCollapsed)
-    }, [isCollapsed, onCollapse])
-
-    return (
-      <Panel
-        ref={ref}
-        className={cn("relative flex h-full w-full", className)}
-        onCollapse={handleCollapse}
-        {...props}
-      />
-    )
-  }
-)
+const ResizablePanel: React.FC<
+  PanelProps & { className?: string }
+> = React.forwardRef<ImperativePanelHandle, PanelProps>((props, ref) => (
+  <Panel
+    ref={ref}
+    {...props}
+    className={cn("relative flex h-full w-full", props.className)}
+  />
+))
 ResizablePanel.displayName = "ResizablePanel"
 
-const ResizableHandle = React.forwardRef<HTMLDivElement, ResizableHandleProps>(
+const ResizableHandle: React.FC<
+  PanelResizeHandleProps & {
+    withHandle?: boolean
+    className?: string
+  }
+> = React.forwardRef<HTMLDivElement, PanelResizeHandleProps & { withHandle?: boolean }>(
   ({ className, withHandle, ...props }, ref) => {
     const handle = withHandle ? (
       <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
@@ -103,4 +81,8 @@ const ResizableHandle = React.forwardRef<HTMLDivElement, ResizableHandleProps>(
 )
 ResizableHandle.displayName = "ResizableHandle"
 
-export { ResizablePanel, ResizablePanelGroup, ResizableHandle }
+export {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+}

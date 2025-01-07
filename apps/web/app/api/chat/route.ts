@@ -1,53 +1,36 @@
 import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import { createLogger } from '@danky/mcp'
+import { getMCPService } from '@/lib/services/mcp-provider'
 
-// Mock server data for development
-const servers = [
-  {
-    id: "1",
-    name: "Local Server",
-    status: "connected" as const,
-    tools: [
-      {
-        id: "1",
-        name: "Code Search",
-        description: "Search through your codebase"
-      },
-      {
-        id: "2",
-        name: "File Editor",
-        description: "Edit files in your workspace"
-      }
-    ]
-  }
-]
-
-const messageSchema = z.object({
-  message: z.string(),
-  sessionId: z.string()
-})
-
-export async function GET() {
-  return NextResponse.json({
-    status: "ready",
-    servers
-  })
-}
+const logger = createLogger({ level: 'info' })
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { message, sessionId } = messageSchema.parse(body)
+    const { message } = await request.json()
+    const service = await getMCPService()
+    const response = await service.processMessage(message)
     
-    // Mock response for development
-    return NextResponse.json({
-      response: `I received your message: "${message}" in session ${sessionId}`
-    })
+    return NextResponse.json({ response })
   } catch (error) {
-    console.error("Error processing message:", error)
+    logger.error('Error processing message:', error)
     return NextResponse.json(
-      { error: "Invalid request" },
-      { status: 400 }
+      { error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
     )
   }
-} 
+}
+
+export async function GET() {
+  try {
+    const service = await getMCPService()
+    await service.initialize()
+    
+    return NextResponse.json({ status: 'ready' })
+  } catch (error) {
+    logger.error('Error initializing chat:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    )
+  }
+}

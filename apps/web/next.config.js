@@ -1,19 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: [
-    '@langchain/langgraph',
-    '@langchain/core',
-    '@langchain/anthropic',
-    '@langchain/openai',
-    '@langchain/groq',
-    '@modelcontextprotocol/sdk',
-    '@h1deya/mcp-langchain-tools',
-    'json5',
-  ],
+  reactStrictMode: true,
+  transpilePackages: ['@danky/ui', '@danky/mcp'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Don't attempt to import these packages on the client side
       config.resolve.fallback = {
+        ...config.resolve.fallback,
         fs: false,
         path: false,
         async_hooks: false,
@@ -34,12 +26,25 @@ const nextConfig = {
         'node:path': false,
       }
     }
+
+    // Add module resolution aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@n8n/json-schema-to-zod': require.resolve('@n8n/json-schema-to-zod'),
+    }
+
+    // Add extension resolution
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+      '.jsx': ['.jsx', '.tsx'],
+    }
+
     return config
   },
-  // Load environment variables from root .env
-  env: {
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-  },
+  eslint: {
+    ignoreDuringBuilds: false,
+    dirs: ['app', 'components', 'lib', 'hooks']
+  }
 }
 
 module.exports = nextConfig

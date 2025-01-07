@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 // In-memory storage for development
@@ -21,11 +21,16 @@ const createSessionSchema = z.object({
   lastMessage: z.string()
 })
 
-export async function GET() {
-  return NextResponse.json({ sessions })
+export async function GET(_request: NextRequest) {
+  return NextResponse.json({ 
+    sessions: sessions.map(session => ({
+      ...session,
+      timestamp: session.timestamp.toISOString()
+    }))
+  })
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { title, lastMessage } = createSessionSchema.parse(body)
@@ -41,13 +46,22 @@ export async function POST(request: Request) {
     
     return NextResponse.json({ 
       sessionId: session.id,
-      session
+      session: {
+        ...session,
+        timestamp: session.timestamp.toISOString()
+      }
     })
   } catch (error) {
     console.error("Error creating session:", error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request", details: error.errors },
+        { status: 400 }
+      )
+    }
     return NextResponse.json(
-      { error: "Invalid request" },
-      { status: 400 }
+      { error: "Failed to create session" },
+      { status: 500 }
     )
   }
 } 

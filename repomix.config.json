@@ -1,0 +1,41 @@
+{
+  "output": {
+    "filePath": "dank-context.md",
+    "style": "markdown",
+    "headerText": "# Danky AI Chatbot Codebase\nThis is a Next.js monorepo project using TypeScript, Drizzle, and MCP for AI interactions.",
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "showLineNumbers": true,
+    "copyToClipboard": false,
+    "topFilesLength": 10,
+    "includeEmptyDirectories": true
+  },
+  "include": [
+    "apps/**/*",
+    "packages/**/*",
+    "*.json",
+    "*.md",
+    ".env.example",
+    ".npmrc",
+    "pnpm-workspace.yaml",
+    "turbo.json"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/dist/**",
+      "**/.env",
+      "**/coverage/**",
+      "**/test-results/**",
+      "**/*.log",
+      "**/.DS_Store"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+} 
