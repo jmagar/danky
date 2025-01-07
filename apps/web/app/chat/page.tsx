@@ -7,7 +7,6 @@ import { ChatMessages } from '@/components/chat/chat-messages'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ChatLayout } from '@/components/chat/chat-layout'
 import { Sidebar } from '@/components/chat/sidebar'
-import { ToolsDropdown } from '@/components/chat/tools-dropdown'
 import { type ChatSession, type Server } from '@/components/chat/types'
 
 export default function ChatPage() {
@@ -62,20 +61,17 @@ export default function ChatPage() {
             _onToggle={() => setIsOpen(!isOpen)}
           />
         }
-        toolsButton={
-          <ToolsDropdown
-            servers={servers}
-            onToolSelect={handleToolSelect}
-            isLoading={isInitializing}
-          />
-        }
       >
         <div className="flex h-full flex-col">
           <div className="flex-1 overflow-y-auto p-4">
             <ChatMessages messages={messages} />
           </div>
           <div className="border-t p-4">
-            <ChatInput isProcessing={isProcessing} />
+            <ChatInput 
+              isProcessing={isProcessing}
+              servers={servers}
+              onToolSelect={handleToolSelect}
+            />
           </div>
         </div>
       </ChatLayout>
