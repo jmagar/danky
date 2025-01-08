@@ -19,6 +19,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  "include": ["src", "tsup.config.ts"],
+  "include": ["src", "tsup.config.ts", "turbo/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

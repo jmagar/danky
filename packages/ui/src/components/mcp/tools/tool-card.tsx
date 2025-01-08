@@ -1,38 +1,33 @@
-'use client'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../card'
-import { Badge } from '../../badge'
-
-export interface ToolCardProps {
-  serverId: string
-  toolId: string
-  name: string
-  description: string
-  onSelect?: () => void
+interface ToolCardProps {
+  title: string;
+  description: string;
+  className?: string;
+  onClick?: () => void;
 }
 
-export function ToolCard({ serverId, toolId, name, description, onSelect }: ToolCardProps) {
+export function ToolCard({
+  title,
+  description,
+  className,
+  onClick,
+}: ToolCardProps) {
   return (
-    <Card 
-      className="cursor-pointer hover:border-primary transition-colors"
-      onClick={onSelect}
+    <Card
+      className={cn(
+        "hover:bg-accent/50 cursor-pointer transition-colors",
+        className
+      )}
+      onClick={onClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div>
-          <CardTitle className="text-sm font-medium">
-            {name}
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Server: {serverId}
-          </CardDescription>
-        </div>
-        <Badge variant="outline" className="bg-blue-500">
-          Tool
-        </Badge>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <CardDescription>{description}</CardDescription>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

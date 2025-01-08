@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@danky/ui', '@danky/mcp'],
+  experimental: {
+    esmExternals: true,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -30,7 +33,7 @@ const nextConfig = {
     // Add module resolution aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@n8n/json-schema-to-zod': require.resolve('@n8n/json-schema-to-zod'),
+      '@n8n/json-schema-to-zod': '@n8n/json-schema-to-zod',
     }
 
     // Add extension resolution

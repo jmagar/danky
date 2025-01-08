@@ -28,7 +28,7 @@
     "dev": "tsc --watch",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .turbo node_modules dist"
+    "clean": "rimraf .turbo node_modules dist"
   },
   "dependencies": {
     "@langchain/anthropic": "^0.3.11",
@@ -49,6 +49,7 @@
     "@danky/typescript-config": "workspace:*",
     "@types/yargs": "^17.0.33",
     "eslint": "^9.0.0",
+    "rimraf": "^5.0.5",
     "typescript": "^5.3.3"
   }
 }
