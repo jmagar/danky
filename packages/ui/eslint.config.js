@@ -1,4 +1,4 @@
-import { config as reactInternalConfig } from "@danky/eslint-config/react-internal";
+import reactInternalConfig from "@danky/eslint-config/react-internal";
 
 export default [
   {

@@ -1,13 +1,14 @@
 import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
-import tseslint from "typescript-eslint";
+import * as tseslint from "@typescript-eslint/eslint-plugin";
+import * as tsParser from "@typescript-eslint/parser";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginReact from "eslint-plugin-react";
 import globals from "globals";
-import { config as baseConfig } from "./base.js";
+import baseConfig from "./base.js";
 
 /** @type {import("eslint").Linter.FlatConfig[]} */
-export const config = [
+const config = [
   {
     ignores: ["node_modules/**", "dist/**", ".next/**", "coverage/**", "*.config.*"],
   },
@@ -16,46 +17,43 @@ export const config = [
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     plugins: {
-      "@typescript-eslint": tseslint.plugin,
+      "@typescript-eslint": tseslint,
       "react": pluginReact,
       "react-hooks": pluginReactHooks,
     },
     languageOptions: {
-      parser: tseslint.parser,
+      parser: tsParser,
       parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
+        project: true,
         ecmaFeatures: {
           jsx: true,
         },
       },
       globals: {
-        ...globals.serviceworker,
         ...globals.browser,
-        React: "readonly",
+        ...globals.node,
+        ...globals.es2021,
       },
     },
-    settings: { 
-      react: { version: "detect" },
-      "import/resolver": {
-        typescript: true,
-        node: true,
+    settings: {
+      react: {
+        version: "detect",
       },
     },
     rules: {
-      ...tseslint.configs.recommended.rules,
-      ...pluginReact.configs.recommended.rules,
-      ...pluginReactHooks.configs.recommended.rules,
+      ...eslintConfigPrettier.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off",
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
-      "react/no-unknown-property": ["error", { 
-        "ignore": ["cmdk-input-wrapper"] 
-      }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        { prefer: "type-imports", fixStyle: "inline-type-imports" },
+      ],
     },
   },
-  eslintConfigPrettier,
 ];
+
+export default config;

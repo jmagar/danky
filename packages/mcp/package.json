@@ -2,10 +2,10 @@
   "name": "@danky/mcp",
   "version": "0.0.1",
   "private": true,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,4 +51,4 @@
     "eslint": "^9.0.0",
     "typescript": "^5.3.3"
   }
-} 
+}

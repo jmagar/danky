@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useChatStore } from '@/lib/stores/chat-store'
 import { ChatInput } from '@/components/chat/chat-input'
 import { ChatMessages } from '@/components/chat/chat-messages'
@@ -8,6 +8,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ChatLayout } from '@/components/chat/chat-layout'
 import { Sidebar } from '@/components/chat/sidebar'
 import { type ChatSession, type Server } from '@/components/chat/types'
+import { Alert, AlertDescription } from '@danky/ui'
+import { AlertCircle } from 'lucide-react'
 
 // Mock data for models - replace with real data later
 const mockModels = [
@@ -18,40 +20,18 @@ const mockModels = [
 ]
 
 export default function ChatPage() {
-  const { messages, isInitializing, isProcessing, error, initialize } = useChatStore()
-  const [currentSessionId, setCurrentSessionId] = useState('')
-  const [sessions, setSessions] = useState<ChatSession[]>([])
-  const [servers, setServers] = useState<Server[]>([])
-  const [currentModel, setCurrentModel] = useState('gpt-4')
-  const [models, setModels] = useState(mockModels)
+  const { 
+    messages, 
+    isInitializing, 
+    isProcessing, 
+    error, 
+    initialize, 
+    clearError 
+  } = useChatStore()
 
   useEffect(() => {
     void initialize();
   }, [initialize]);
-
-  const handleNewChat = () => {
-    // TODO: Implement new chat functionality
-  }
-
-  const handleSelectSession = (session: ChatSession) => {
-    setCurrentSessionId(session.id)
-  }
-
-  const handleToolSelect = (serverId: string, toolId: string) => {
-    // TODO: Implement tool selection
-  }
-
-  const handleModelSelect = (modelId: string) => {
-    setCurrentModel(modelId)
-  }
-
-  const handleToggleFavorite = (modelId: string) => {
-    setModels(models.map(model => 
-      model.id === modelId 
-        ? { ...model, isFavorite: !model.isFavorite }
-        : model
-    ))
-  }
 
   if (isInitializing) {
     return (
@@ -61,23 +41,15 @@ export default function ChatPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-red-500">{error}</div>
-      </div>
-    )
-  }
-
   return (
     <div className="h-full">
       <ChatLayout
         sidebar={
           <Sidebar
-            models={models}
-            currentModel={currentModel}
-            onModelSelect={handleModelSelect}
-            onToggleFavorite={handleToggleFavorite}
+            models={mockModels}
+            currentModel="claude-2"
+            onModelSelect={() => {}}
+            onToggleFavorite={() => {}}
             user={{
               name: "John Doe",
               email: "john@example.com",
@@ -87,18 +59,32 @@ export default function ChatPage() {
         }
       >
         <div className="flex h-full flex-col">
+          {error && (
+            <Alert variant="destructive" className="m-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+                <button 
+                  onClick={clearError}
+                  className="ml-2 underline hover:no-underline"
+                >
+                  Dismiss
+                </button>
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex-1 overflow-y-auto p-4">
             <ChatMessages messages={messages} />
           </div>
           <div className="border-t p-4">
             <ChatInput 
               isProcessing={isProcessing}
-              servers={servers}
-              onToolSelect={handleToolSelect}
+              servers={[]}
+              onToolSelect={() => {}}
             />
           </div>
         </div>
       </ChatLayout>
     </div>
   )
-} 
+}

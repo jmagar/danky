@@ -1,60 +1,57 @@
 "use client"
 
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { detectCodeLanguage, isCodeLike } from './utils'
+import { getHighlighter, type Highlighter, bundledLanguages } from 'shiki'
+import { useTheme } from 'next-themes'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw'
+import { useEffect, useState } from 'react'
 
 interface MessageContentProps {
   content: string
 }
 
 export function MessageContent({ content }: MessageContentProps) {
-  // Try to detect if the content is code
-  const codeBlockRegex = /^```(\w+)?\n([\s\S]*)\n```$/
-  const match = content.match(codeBlockRegex)
-  
-  if (match) {
-    // If language is specified in the code block
-    const language = match[1]?.toLowerCase() || 'text'
-    const code = match[2]
-    
-    return (
-      <SyntaxHighlighter
-        language={language}
-        style={oneDark}
-        customStyle={{ margin: 0, background: 'transparent' }}
-      >
-        {code}
-      </SyntaxHighlighter>
-    )
-  }
+  const { theme } = useTheme()
+  const [highlighter, setHighlighter] = useState<Highlighter | null>(null)
 
-  // Try to parse as JSON if it's not a code block
-  try {
-    const parsed = JSON.parse(content)
-    return (
-      <SyntaxHighlighter
-        language="json"
-        style={oneDark}
-        customStyle={{ margin: 0, background: 'transparent' }}
-      >
-        {JSON.stringify(parsed, null, 2)}
-      </SyntaxHighlighter>
-    )
-  } catch {
-    if (isCodeLike(content)) {
-      return (
-        <SyntaxHighlighter
-          language={detectCodeLanguage(content)}
-          style={oneDark}
-          customStyle={{ margin: 0, background: 'transparent' }}
-        >
-          {content}
-        </SyntaxHighlighter>
-      )
-    }
+  useEffect(() => {
+    getHighlighter({
+      themes: [theme === 'dark' ? 'github-dark' : 'github-light'],
+      langs: Object.keys(bundledLanguages),
+    }).then(setHighlighter)
+  }, [theme])
 
-    // If not code, return as plain text
-    return content
-  }
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm, remarkMath]}
+      rehypePlugins={[rehypeKatex, rehypeRaw]}
+      components={{
+        code({ className, children }) {
+          const match = /language-(\w+)/.exec(className || '')
+          const language = match ? match[1] : 'text'
+
+          if (!className || !highlighter) {
+            return <code className={className}>{children}</code>
+          }
+
+          const html = highlighter.codeToHtml(String(children), {
+            lang: language,
+            theme: theme === 'dark' ? 'github-dark' : 'github-light',
+          })
+
+          return (
+            <div
+              dangerouslySetInnerHTML={{ __html: html }}
+              className="not-prose"
+            />
+          )
+        },
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  )
 } 

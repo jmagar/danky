@@ -1,5 +1,5 @@
 {
-  "extends": "../../packages/typescript-config/nextjs.json",
+  "extends": "@danky/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {
@@ -15,14 +15,16 @@
       "@danky/mcp/*": ["../../packages/mcp/src/*"]
     },
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "types": ["node", "react", "react-dom"]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
     "next.config.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "types.d.ts"
   ],
   "exclude": [
     "node_modules"

@@ -1,14 +1,11 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
-import { cn } from '@danky/ui'
-
-interface LoadingSpinnerProps {
-  className?: string
-}
-
-export function LoadingSpinner({ className }: LoadingSpinnerProps) {
+export function LoadingSpinner() {
   return (
-    <Loader2 className={cn('h-6 w-6 animate-spin', className)} />
+    <div className="flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary">
+        <span className="sr-only">Loading...</span>
+      </div>
+    </div>
   )
-} 
+}

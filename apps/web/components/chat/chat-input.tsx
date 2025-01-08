@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { useChatStore } from '@/lib/stores/chat-store'
-import { Button, Textarea } from '@danky/ui'
+import { Button, Textarea, buttonVariants } from '@danky/ui'
 import { SendHorizontal, Loader2 } from 'lucide-react'
 import { AttachmentButton } from './attachment-button'
 import { ToolsDropdown } from './tools-dropdown'
 import { type Server } from './types'
+import { cn } from '@danky/ui'
 
 interface ChatInputProps {
   isProcessing: boolean
@@ -56,11 +57,13 @@ export function ChatInput({
             onToolSelect={onToolSelect}
             isLoading={isProcessing}
           />
-          <Button
+          <button
             type="submit"
-            size="icon"
             disabled={isProcessing || !input.trim()}
-            className="h-8 w-8"
+            className={cn(
+              buttonVariants({ variant: 'default', size: 'icon' }),
+              'h-8 w-8'
+            )}
           >
             {isProcessing ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -68,9 +71,9 @@ export function ChatInput({
               <SendHorizontal className="h-4 w-4" />
             )}
             <span className="sr-only">Send message</span>
-          </Button>
+          </button>
         </div>
       </div>
     </form>
   )
-} 
+}

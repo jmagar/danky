@@ -20,7 +20,8 @@
     "allowJs": true,
     "jsx": "preserve",
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"]
   },
   "exclude": ["node_modules"]
 }

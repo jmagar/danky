@@ -1,39 +1,29 @@
 'use client'
 
+import { Message } from './message'
+import { type Message as MessageType } from './types'
 import { cn } from '@danky/ui'
 
-interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 interface ChatMessagesProps {
-  messages: ChatMessage[]
+  messages: MessageType[]
 }
 
 export function ChatMessages({ messages }: ChatMessagesProps) {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col space-y-4">
       {messages.map((message, index) => (
-        <div
-          key={index}
-          className={cn(
-            'flex w-full',
-            message.role === 'user' ? 'justify-end' : 'justify-start'
-          )}
-        >
-          <div
-            className={cn(
-              'rounded-lg px-4 py-2 max-w-[80%]',
-              message.role === 'user'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted'
-            )}
-          >
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-          </div>
-        </div>
+        <Message
+          key={`${message.role}-${index}-${message.timestamp.getTime()}`}
+          role={message.role}
+          content={message.content}
+          timestamp={message.timestamp}
+        />
       ))}
+      {messages.length === 0 && (
+        <div className="flex h-[50vh] items-center justify-center text-muted-foreground">
+          Start a conversation...
+        </div>
+      )}
     </div>
   )
-} 
+}
