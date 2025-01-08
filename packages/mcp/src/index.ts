@@ -20,16 +20,18 @@ export class MCPService {
   private agent: ReturnType<typeof createReactAgent> | null = null
   private cleanup: MCPServerCleanupFunction | null = null
   private logger: Logger
+  private configPath: string
 
   constructor(options: MCPServiceOptions = {}) {
     this.logger = options.logger || createLogger({ level: 'info' })
+    this.configPath = options.configPath || 'mcp-config.json5'
   }
 
   async initialize(): Promise<void> {
     try {
       // Load and validate config
       this.logger.info('Loading MCP configuration')
-      const configPath = process.env.CONFIG_FILE || 'mcp-config.json5'
+      const configPath = process.env.CONFIG_FILE || this.configPath
       this.config = loadConfig(configPath)
       this.logger.info('Configuration loaded successfully')
 
@@ -54,7 +56,13 @@ export class MCPService {
       })
       this.logger.info('React agent created successfully')
     } catch (error) {
-      this.logger.error('Failed to initialize MCP Service:', error)
+      this.logger.error('Failed to initialize MCP Service:', {
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } : String(error)
+      })
       throw error
     }
   }
@@ -71,7 +79,13 @@ export class MCPService {
       )
       return result.messages[result.messages.length - 1].content
     } catch (error) {
-      this.logger.error('Error processing message:', error)
+      this.logger.error('Error processing message:', {
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } : String(error)
+      })
       throw error
     }
   }

@@ -3,12 +3,6 @@
 
 import JSON5 from 'json5';
 import { readFileSync } from 'fs';
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Load environment variables from root .env file
-const rootEnvPath = path.resolve(__dirname, '../../../.env');
-dotenv.config({ path: rootEnvPath });
 
 // Validate required environment variables
 function validateEnvironmentVariables(config: Config): void {
@@ -75,6 +69,13 @@ export interface Config {
 
 export function loadConfig(configPath: string): Config {
   try {
+    // Check if file exists
+    try {
+      readFileSync(configPath);
+    } catch (error) {
+      throw new Error(`Config file not found at "${configPath}". Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
     let json5Str = readFileSync(configPath, 'utf-8');
 
     // Replace environment variables in the format ${VAR_NAME} with their values
@@ -85,7 +86,12 @@ export function loadConfig(configPath: string): Config {
       }
     });
 
-    const config = JSON5.parse(json5Str);
+    let config;
+    try {
+      config = JSON5.parse(json5Str);
+    } catch (error) {
+      throw new Error(`Failed to parse config file: ${error instanceof Error ? error.message : String(error)}`);
+    }
 
     // Validate required fields
     validateConfig(config);
