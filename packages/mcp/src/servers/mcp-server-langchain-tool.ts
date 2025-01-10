@@ -15,8 +15,8 @@ const { jsonSchemaToZod } = require('@n8n/json-schema-to-zod/dist/cjs/index.js')
 
 interface MCPServerConfig {
   command: string;
-  args: readonly string[];
-  env?: Readonly<Record<string, string>>;
+  args: string[];
+  env?: Record<string, string>;
 }
 
 export interface MCPServersConfig {
@@ -120,8 +120,8 @@ async function convertMCPServerToLangChainTools(
   try {
     transport = new StdioClientTransport({
       command: config.command,
-      args: config.args as string[],
-      env: config.env,
+      args: config.args ?? [],
+      env: config.env ?? {},
     });
 
     client = new Client(

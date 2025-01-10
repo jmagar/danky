@@ -14,8 +14,22 @@
     "noEmit": true,
     "plugins": [{ "name": "next" }],
     "resolveJsonModule": true,
-    "target": "es5"
+    "target": "ES2022",
+    "types": ["node", "react", "react-dom"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force"
   },
   "include": ["src", "next-env.d.ts"],
-  "exclude": ["node_modules", ".next", "coverage", ".turbo", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "coverage",
+    ".turbo",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

@@ -4,20 +4,19 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts"
 import { Card } from "../card"
-import { useTheme } from "next-themes"
 
 import type { TooltipProps } from "recharts"
 import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent"
 
 interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: any[]
+  href: string
+  title: string
 }
 
-export function Chart({ data, className, ...props }: ChartProps) {
-  const { theme: mode } = useTheme()
-
+export function Chart({ data, className, href, title, ...props }: ChartProps) {
   return (
-    <Card className={cn("space-y-4", className)} {...props}>
+    <Card className={cn("space-y-4", className)} href={href} title={title} {...props}>
       <ResponsiveContainer width="100%" height={350}>
         <LineChart data={data}>
           <Line

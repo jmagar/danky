@@ -31,7 +31,7 @@ export class MCPService {
     try {
       // Load and validate config
       this.logger.info('Loading MCP configuration')
-      const configPath = process.env.CONFIG_FILE || this.configPath
+      const configPath = process.env["CONFIG_FILE"] ?? this.configPath
       this.config = loadConfig(configPath)
       this.logger.info('Configuration loaded successfully')
 
@@ -77,7 +77,7 @@ export class MCPService {
         { messages: [new HumanMessage(message)] },
         { configurable: { thread_id: 'test-thread' } }
       )
-      return result.messages[result.messages.length - 1].content
+      return result["messages"][result["messages"].length - 1].content
     } catch (error) {
       this.logger.error('Error processing message:', {
         error: error instanceof Error ? {

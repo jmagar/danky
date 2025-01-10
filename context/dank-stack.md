@@ -64,9 +64,9 @@ Model Context Protocol AI Chatbot:
 
 - Zod for validation
   - `/packages/schema/` - Shared schema definitions 🔴
-    - `/packages/schema/src/` - Schema source files 🔴
-    - `/packages/schema/index.ts` - Schema exports 🔴
-  - `/apps/web/lib/validations/*` - Application-specific schemas 🔴
+    - `/packages/schema/src/` - Schema source files 🟢
+    - `/packages/schema/index.ts` - Schema exports 🟢
+  - `/apps/web/lib/validations/*` - Application-specific schemas 🟢
 
 ## AI Provider Support
 - OpenAI, Anthropic, and OpenRouter support

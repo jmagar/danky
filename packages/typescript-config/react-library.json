@@ -4,23 +4,24 @@
   "extends": "./base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "target": "es6",
+    "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["react", "react-dom"],
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipDefaultLibCheck": true,
+    "target": "ES2022",
+    "types": ["node", "react", "react-dom"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "importHelpers": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "noEmit": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src", "*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

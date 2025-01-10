@@ -22,7 +22,7 @@ function validateEnvironmentVariables(config: Config): void {
   }
 
   // Check server environment variables
-  Object.entries(config.mcpServers || {}).forEach(([serverName, server]) => {
+  Object.entries(config.mcpServers || {}).forEach(([_, server]) => {
     if (server.env) {
       Object.values(server.env).forEach(value => {
         if (typeof value === 'string' && value.includes('${')) {

@@ -1,6 +1,12 @@
 {
   "extends": "@danky/typescript-config/base.json",
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.json",
+    "src/client.ts",
+    "src/schema/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "outDir": "./dist",
@@ -15,10 +21,12 @@
     "composite": true,
     "noEmit": false,
     "paths": {
-      "@danky/logger": ["../logger/src"]
+      "@danky/logger": ["../logger/src"],
+      "@danky/schema": ["../schema/src"]
     }
   },
   "references": [
-    { "path": "../logger" }
+    { "path": "../logger" },
+    { "path": "../schema" }
   ]
 }

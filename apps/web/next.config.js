@@ -4,6 +4,7 @@ const nextConfig = {
   transpilePackages: ['@danky/ui', '@danky/mcp'],
   experimental: {
     esmExternals: true,
+    serverComponentsExternalPackages: ['shiki'],
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -46,7 +47,7 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
-    dirs: ['app', 'components', 'lib', 'hooks']
+    dirs: ['src/app', 'src/components', 'src/lib', 'src/hooks']
   }
 }
 

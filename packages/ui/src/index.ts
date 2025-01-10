@@ -41,6 +41,8 @@ export * from './components/toggle'
 export * from './components/tooltip'
 export * from './components/resizable'
 export * from './components/theme-toggle'
+export * from './components/loading-spinner'
+export * from './components/message-input'
 
 // Hooks
 export * from './hooks/use-toast'
@@ -56,4 +58,4 @@ export * from './styles/fonts'
 export * from './lib/utils'
 
 // Types
-export type { ToastProps, ToastActionElement } from './components/toast' 
+export type { ToastProps, ToastActionElement } from './components/toast'

@@ -11,7 +11,13 @@ const compat = new FlatCompat();
 /** @type {import("eslint").Linter.FlatConfig[]} */
 const config = [
   {
-    ignores: ["node_modules/**", "dist/**", ".next/**", "coverage/**", "*.config.*"],
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      ".next/**",
+      "coverage/**",
+      "*.config.*",
+    ],
   },
   js.configs.recommended,
   {
@@ -35,10 +41,17 @@ const config = [
       ...eslintConfigPrettier.rules,
       "@typescript-eslint/adjacent-overload-signatures": "error",
       "@typescript-eslint/ban-types": "error",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/consistent-type-imports": [
-        "warn",
+        "error",
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
       "@typescript-eslint/consistent-type-assertions": "error",
@@ -49,6 +62,21 @@ const config = [
       "@typescript-eslint/no-this-alias": "error",
       "@typescript-eslint/prefer-as-const": "error",
       "@typescript-eslint/triple-slash-reference": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/no-inferrable-types": "error",
+      "@typescript-eslint/no-unnecessary-type-assertion": "error",
+      "@typescript-eslint/no-unnecessary-condition": "error",
+      "@typescript-eslint/strict-boolean-expressions": "error",
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
+      "@typescript-eslint/prefer-optional-chain": "error",
+      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/require-await": "error",
+      "no-console": ["error", { allow: ["warn", "error"] }],
+      "no-debugger": "error",
+      "no-alert": "error",
     },
   },
 ];
