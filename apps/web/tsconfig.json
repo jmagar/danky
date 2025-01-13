@@ -1,31 +1,28 @@
 {
-  "extends": "@danky/typescript-config/nextjs.json",
+  "extends": "../../packages/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "baseUrl": "src",
     "paths": {
-      "@/*": ["./*"],
-      "@/lib/*": ["lib/*"],
-      "@/components/*": ["components/*"],
-      "@/app/*": ["app/*"],
-      "@/hooks/*": ["hooks/*"],
-      "@/styles/*": ["styles/*"],
+      "@/*": ["./src/*"],
+      "@/env": ["./env.ts"],
       "@danky/ui": ["../../packages/ui/src"],
       "@danky/ui/*": ["../../packages/ui/src/*"],
+      "@danky/schema": ["../../packages/schema/src"],
+      "@danky/schema/*": ["../../packages/schema/src/*"],
+      "@danky/db": ["../../packages/db/src"],
+      "@danky/db/*": ["../../packages/db/src/*"],
+      "@danky/redis": ["../../packages/redis/src"],
+      "@danky/redis/*": ["../../packages/redis/src/*"],
+      "@danky/logger": ["../../packages/logger/src"],
+      "@danky/logger/*": ["../../packages/logger/src/*"],
       "@danky/mcp": ["../../packages/mcp/src"],
       "@danky/mcp/*": ["../../packages/mcp/src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "next-env.d.ts",
-    "next.config.js",
-    "types.d.ts"
-  ],
-  "exclude": ["node_modules", ".next", "dist"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

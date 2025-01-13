@@ -3,12 +3,16 @@ import { createMessageRequestSchema, listMessagesRequestSchema } from '@danky/sc
 
 // Extend the base create message schema with app-specific fields
 export const webCreateMessageSchema = createMessageRequestSchema.extend({
-  attachments: z.array(z.object({
-    name: z.string(),
-    url: z.string().url(),
-    type: z.string(),
-    size: z.number(),
-  })).optional(),
+  attachments: z
+    .array(
+      z.object({
+        name: z.string(),
+        url: z.string().url(),
+        type: z.string(),
+        size: z.number(),
+      })
+    )
+    .optional(),
 });
 
 // Extend the base list messages schema with app-specific fields
@@ -16,6 +20,9 @@ export const webListMessagesSchema = listMessagesRequestSchema.extend({
   includeDeleted: z.boolean().default(false),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
+
+// Export the list messages params type
+export type WebListMessagesParams = z.infer<typeof webListMessagesSchema>;
 
 // Chat settings schema
 export const chatSettingsSchema = z.object({
@@ -25,4 +32,4 @@ export const chatSettingsSchema = z.object({
   topP: z.number().min(0).max(1).default(1),
   frequencyPenalty: z.number().min(-2).max(2).default(0),
   presencePenalty: z.number().min(-2).max(2).default(0),
-}); 
+});

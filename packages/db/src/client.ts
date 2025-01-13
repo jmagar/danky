@@ -1,33 +1,37 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { createLogger } from "@danky/logger";
-import * as schema from "./schema";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { env } from './env';
 
-const logger = createLogger("db");
-
-// Load environment variables
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is required");
-}
-
-// Configure connection pool
+// Configure connection pool with PgBouncer settings
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  // PgBouncer settings
-  statement_timeout: 60000, // 1 minute
-  max: 10, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // How long to wait for a connection
+  connectionString: env.DATABASE_URL,
+  max: 20, // Match PGBOUNCER_DEFAULT_POOL_SIZE
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  statement_timeout: 60000,
+  query_timeout: 60000,
 });
 
-// Add error handler
-pool.on("error", (err) => {
-  logger.error({ err }, "Unexpected error on idle client");
-  process.exit(-1);
+export const db = drizzle(pool, {
+  logger: env.NODE_ENV === 'development',
 });
 
-// Create Drizzle instance
-export const db = drizzle(pool, { schema });
+// Export type for the database client
+export type DrizzleClient = typeof db;
 
-// Export pool for direct usage if needed
-export { pool }; 
+// Export a type-safe transaction helper
+export async function transaction<T>(callback: (db: DrizzleClient) => Promise<T>): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await callback(drizzle(client));
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}

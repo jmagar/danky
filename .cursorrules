@@ -1,16 +1,94 @@
 # Cursor Rules for Danky AI Chatbot
 
-monorepo:
-  - "Follow monorepo package boundaries"
-  - "No relative imports between packages"
-  - "Use workspace dependencies correctly"
-  - "Keep shared code in packages/*"
-  - "Keep apps in apps/*"
-  - "Only global configs at root"
-  - "Use proper workspace references"
-  - "Follow changesets for versioning"
-  - "Keep dependencies consistent across packages"
-  - "Use pnpm for package management"
+project:
+  structure:
+    apps:
+      web:
+        components:
+          chat:
+            - "Keep message components focused and small"
+            - "Implement proper loading states"
+            - "Use proper error boundaries"
+            - "Keep chat layout components under 250 lines"
+            - "Extract complex chat logic to custom hooks"
+            - "Use proper TypeScript types from @danky/schema"
+          sidebar:
+            - "Follow consistent sidebar component structure"
+            - "Use SidebarContext for state management"
+            - "Keep sidebar components focused on single responsibility"
+            - "Implement proper mobile responsiveness"
+            - "Use proper TypeScript types for sidebar props"
+          mcp:
+            - "Keep MCP panel components focused"
+            - "Implement proper tool selection handling"
+            - "Use proper server and tool type definitions"
+            - "Handle loading and error states properly"
+          theme:
+            - "Use ThemeProvider consistently"
+            - "Implement proper theme toggle functionality"
+            - "Follow dark/light mode patterns"
+        hooks:
+          - "Keep hooks focused and reusable"
+          - "Implement proper cleanup in useEffect"
+          - "Use proper TypeScript types"
+          - "Handle mobile detection properly in useIsMobile"
+        api:
+          - "Implement proper error handling with custom error classes"
+          - "Use zod for input validation"
+          - "Follow RESTful patterns for routes"
+          - "Use proper TypeScript types from @danky/schema"
+          - "Implement proper session management"
+    packages:
+      ui:
+        - "Keep UI components pure and reusable"
+        - "Follow shadcn/ui patterns"
+        - "Implement proper accessibility"
+        - "Use proper TypeScript types"
+        - "Keep components under 100 lines"
+        - "Export components through index.ts"
+      db:
+        - "Use Drizzle for database operations"
+        - "Keep migrations organized"
+        - "Implement proper error handling"
+        - "Use proper TypeScript types"
+      redis:
+        - "Implement proper client creation"
+        - "Handle pub/sub patterns correctly"
+        - "Use proper environment variables"
+      qdrant:
+        - "Implement proper vector operations"
+        - "Handle collection management properly"
+        - "Use proper environment variables"
+      logger:
+        - "Use Pino for logging"
+        - "Implement proper log levels"
+        - "Use proper environment variables"
+  standards:
+    files:
+      length:
+        react:
+          component: 250
+          hook: 100
+          util: 200
+        typescript:
+          service: 200
+          type: 100
+          config: 150
+    functions:
+      - "Avoid duplicate function implementations"
+      - "Use proper TypeScript types"
+      - "Implement proper error handling"
+      - "Keep functions focused and small"
+    errors:
+      - "Use custom error classes from lib/errors"
+      - "Implement proper error boundaries"
+      - "Handle database errors properly"
+      - "Use proper error logging"
+    state:
+      - "Use proper context providers"
+      - "Implement proper state management patterns"
+      - "Keep state close to where it's used"
+      - "Use proper TypeScript types for state"
 
 typescript:
   - "No any types unless absolutely necessary"
@@ -257,4 +335,4 @@ general:
   - "Follow proper error handling patterns"
   - "Use proper type safety"
   - "Follow proper naming conventions"
-  - "Keep code modular and reusable" 
+  - "Keep code modular and reusable"

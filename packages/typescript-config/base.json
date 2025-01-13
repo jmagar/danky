@@ -10,40 +10,25 @@
     "inlineSources": false,
     "isolatedModules": true,
     "moduleResolution": "bundler",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node"],
-
-    // Strict Type Checking
     "strict": true,
-    "noImplicitAny": true,
     "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
     "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
-    "alwaysStrict": true,
-
-    // Additional Checks
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,
-
-    // Module Resolution
-    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "verbatimModuleSyntax": true,
-    "exactOptionalPropertyTypes": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false
+    "moduleDetection": "force",
+    "sourceMap": true,
+    "types": ["node"],
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist"]
 }

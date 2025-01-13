@@ -7,7 +7,11 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
   "scripts": {
     "build": "tsup",
@@ -17,14 +21,16 @@
     "clean": "rimraf .turbo node_modules dist"
   },
   "dependencies": {
-    "zod": "^3.22.4"
+    "@h1deya/langchain-mcp-tools": "^0.1.4",
+    "langchain": "0.3.11",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@danky/eslint-config": "workspace:*",
     "@danky/typescript-config": "workspace:*",
-    "eslint": "^8.56.0",
-    "rimraf": "^5.0.5",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3"
+    "eslint": "^9.18.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.4.5"
   }
-} 
+}

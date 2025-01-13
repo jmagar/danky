@@ -1,0 +1,155 @@
+{
+  "project": {
+    "name": "Danky",
+    "type": "monorepo",
+    "description": "AI-powered chat application with advanced features",
+    "packageManager": "pnpm",
+    "architecture": "Next.js App Router with TypeScript",
+    "structure": {
+      "apps": {
+        "web": {
+          "description": "Main web application",
+          "tech": ["Next.js", "React", "TypeScript"],
+          "structure": {
+            "app": "Next.js App Router pages and API routes",
+            "components": "Reusable React components",
+            "hooks": "Custom React hooks",
+            "lib": "Utility functions and services",
+            "types": "TypeScript type definitions"
+          }
+        }
+      },
+      "packages": {
+        "ui": {
+          "description": "Shared UI component library",
+          "tech": ["React", "shadcn/ui", "Tailwind CSS"]
+        },
+        "db": {
+          "description": "Database access layer",
+          "tech": ["Drizzle ORM", "PostgreSQL"]
+        },
+        "redis": {
+          "description": "Redis client and utilities",
+          "tech": ["Redis", "TypeScript"]
+        },
+        "mcp": {
+          "description": "AI/LLM integration layer",
+          "tech": ["LangChain", "TypeScript"]
+        },
+        "logger": {
+          "description": "Logging utilities",
+          "tech": ["Pino"]
+        },
+        "schema": {
+          "description": "Shared schema definitions",
+          "tech": ["Zod", "TypeScript"]
+        },
+        "qdrant": {
+          "description": "Vector database client",
+          "tech": ["Qdrant", "TypeScript"]
+        },
+        "config-packages": {
+          "description": "Shared configuration packages",
+          "items": [
+            "typescript-config",
+            "eslint-config",
+            "tailwind-config",
+            "postcss-config",
+            "next-config",
+            "build-config"
+          ]
+        }
+      }
+    },
+    "features": {
+      "chat": {
+        "description": "AI chat interface",
+        "components": {
+          "ChatInterface": {
+            "responsibility": "Main chat UI container",
+            "state": "Uses Zustand for chat state management",
+            "children": ["MessageList", "ChatInput", "ChatControls"]
+          },
+          "MessageList": {
+            "responsibility": "Displays chat messages",
+            "state": "Read-only from chat store",
+            "features": ["Virtual scrolling", "Message grouping"]
+          },
+          "ChatInput": {
+            "responsibility": "Message input and submission",
+            "state": "Local form state with react-hook-form",
+            "features": ["Command palette", "Markdown support"]
+          }
+        },
+        "state": {
+          "stores": ["useChatStore", "useSettingsStore"],
+          "persistence": "Local storage + DB sync"
+        },
+        "api": {
+          "endpoints": ["/api/chat/route.ts", "/api/actions/chat.ts"]
+        }
+      },
+      "sidebar": {
+        "description": "Navigation and context sidebar",
+        "components": {
+          "Sidebar": {
+            "responsibility": "Main sidebar container",
+            "state": "Uses Zustand for sidebar state",
+            "children": ["SidebarSection", "SidebarTrigger", "SidebarSearch"]
+          },
+          "SidebarSection": {
+            "responsibility": "Collapsible sidebar section",
+            "props": ["title", "children", "defaultExpanded"],
+            "features": ["Animated expansion", "Persistence"]
+          },
+          "SidebarSearch": {
+            "responsibility": "Search interface for sidebar content",
+            "state": "Local search state",
+            "features": ["Fuzzy search", "Keyboard navigation"]
+          }
+        }
+      }
+    },
+    "state": {
+      "global": {
+        "stores": {
+          "chat": "Chat messages and settings",
+          "ui": "UI state and preferences",
+          "auth": "Authentication state"
+        },
+        "persistence": {
+          "local": ["ui preferences", "draft messages"],
+          "server": ["chat history", "user settings"]
+        }
+      }
+    },
+    "infrastructure": {
+      "database": {
+        "main": "PostgreSQL with Drizzle ORM",
+        "cache": "Redis",
+        "vector": "Qdrant"
+      },
+      "ai": {
+        "framework": "LangChain",
+        "features": ["Chat completion", "Embeddings", "Tool execution"]
+      },
+      "deployment": {
+        "containerization": "Docker",
+        "services": ["web", "db", "redis", "qdrant"]
+      }
+    },
+    "standards": {
+      "code": {
+        "style": "Prettier",
+        "linting": "ESLint with custom config",
+        "testing": "Vitest",
+        "documentation": "TSDoc"
+      },
+      "components": {
+        "styling": "Tailwind CSS",
+        "accessibility": "ARIA compliant",
+        "structure": "Atomic design"
+      }
+    }
+  }
+}

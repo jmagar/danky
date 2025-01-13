@@ -1,8 +1,3 @@
-import baseConfig from "@danky/eslint-config/base";
+import { baseConfig } from '@danky/eslint-config';
 
-export default [
-  {
-    ignores: ["dist", ".turbo", "node_modules"]
-  },
-  ...baseConfig
-]; 
+export default baseConfig;

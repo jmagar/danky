@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../card'
-import { Badge } from '../../badge'
+import { Badge } from '../../ui/badge'
 
 export interface ServerCardProps {
   serverId: string
@@ -18,7 +18,7 @@ export function ServerCard({ serverId, status, description, onSelect }: ServerCa
   }
 
   return (
-    <Card 
+    <Card
       className="cursor-pointer hover:border-primary transition-colors"
       onClick={onSelect}
     >
@@ -37,4 +37,4 @@ export function ServerCard({ serverId, status, description, onSelect }: ServerCa
       )}
     </Card>
   )
-} 
+}

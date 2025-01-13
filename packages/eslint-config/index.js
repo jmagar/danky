@@ -1,1 +1,10 @@
-module.exports = { extends: ["next/core-web-vitals"], env: { node: true, browser: true, es6: true }, rules: { "@typescript-eslint/no-require-imports": "off" } }
+import baseConfig from './base.js';
+import nextConfig from './next.js';
+import reactInternalConfig from './react-internal.js';
+
+export { baseConfig, nextConfig, reactInternalConfig };
+
+// Default export for backwards compatibility
+export default {
+  extends: ['./base.js'],
+};

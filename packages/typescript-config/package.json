@@ -2,10 +2,14 @@
   "name": "@danky/typescript-config",
   "version": "0.0.1",
   "private": true,
-  "main": "base.json",
   "files": [
     "base.json",
     "react-library.json",
     "nextjs.json"
-  ]
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./react-library.json": "./react-library.json",
+    "./nextjs.json": "./nextjs.json"
+  }
 }

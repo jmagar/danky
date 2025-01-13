@@ -1,49 +1,68 @@
-import { db } from '@danky/db';
-import { messages, conversations } from '@danky/db/schema/chat';
-import { and, desc, eq, sql, ilike, or, isNull } from 'drizzle-orm';
 import { z } from 'zod';
+import { chats, sessions } from '@danky/db';
+import { and, desc, eq, sql, ilike, isNull } from 'drizzle-orm';
 import { webListMessagesSchema } from '../validations/chat';
-import { 
-  createSessionRequestSchema, 
-  listSessionsRequestSchema, 
+import {
+  createSessionRequestSchema,
+  listSessionsRequestSchema,
   updateSessionRequestSchema,
   deleteSessionRequestSchema,
-  createMessageRequestSchema 
+  createMessageRequestSchema,
 } from '@danky/schema';
 import { withWriteTransaction, withReadOnlyTransaction } from './transaction';
 import { ForbiddenError, NotFoundError } from '../errors';
 
 export async function getMessages(input: z.infer<typeof webListMessagesSchema>) {
-  return withReadOnlyTransaction(async (tx) => {
+  return withReadOnlyTransaction(async tx => {
     const { sessionId, page, limit, includeDeleted, sortOrder } = input;
     const offset = (page - 1) * limit;
 
+    // Verify user has access to the session
+    const [session] = await tx
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.id, sessionId), isNull(sessions.deletedAt)))
+      .execute();
+
+    if (!session) {
+      throw new NotFoundError('Session not found or access denied');
+    }
+
     // Build where clause
     const whereClause = and(
-      eq(messages.conversationId, sessionId),
-      includeDeleted ? undefined : isNull(messages.deletedAt)
+      eq(chats.sessionId, sessionId),
+      includeDeleted ? undefined : isNull(chats.deletedAt)
     );
-    
+
     // Get total count first
     const [countResult] = await tx
       .select({ count: sql<number>`count(*)` })
-      .from(messages)
+      .from(chats)
       .where(whereClause)
       .execute();
-      
+
     const totalItems = Number(countResult?.count ?? 0);
     const totalPages = Math.ceil(totalItems / limit);
-    
+
     // Get paginated messages
     const results = await tx
-      .select()
-      .from(messages)
+      .select({
+        id: chats.id,
+        role: chats.role,
+        content: chats.content,
+        sessionId: chats.sessionId,
+        metadata: chats.metadata,
+        createdAt: chats.createdAt,
+        updatedAt: chats.updatedAt,
+        deletedAt: chats.deletedAt,
+      })
+      .from(chats)
       .where(whereClause)
-      .orderBy(sortOrder === 'desc' ? desc(messages.createdAt) : messages.createdAt)
+      .orderBy(sortOrder === 'desc' ? desc(chats.createdAt) : chats.createdAt)
       .limit(limit)
       .offset(offset)
       .execute();
-      
+
     return {
       messages: results,
       pagination: {
@@ -51,22 +70,25 @@ export async function getMessages(input: z.infer<typeof webListMessagesSchema>) 
         limit,
         totalPages,
         totalItems,
-      }
+      },
     };
   });
 }
 
-export async function createSession(input: z.infer<typeof createSessionRequestSchema>, userId: string) {
-  return withWriteTransaction(async (tx) => {
+export async function createSession(
+  input: z.infer<typeof createSessionRequestSchema>,
+  userId: string
+) {
+  return withWriteTransaction(async tx => {
     const result = await tx
-      .insert(conversations)
+      .insert(sessions)
       .values({
-        title: input.name,
+        title: input.title,
         userId,
         modelId: input.modelId,
         description: input.description,
         isArchived: false,
-        metadata: input.metadata,
+        metadata: JSON.stringify(input.metadata),
       })
       .returning()
       .execute();
@@ -75,22 +97,25 @@ export async function createSession(input: z.infer<typeof createSessionRequestSc
   });
 }
 
-export async function getSessions(input: z.infer<typeof listSessionsRequestSchema>, userId: string) {
-  return withReadOnlyTransaction(async (tx) => {
+export async function getSessions(
+  input: z.infer<typeof listSessionsRequestSchema>,
+  userId: string
+) {
+  return withReadOnlyTransaction(async tx => {
     const { page, limit, search } = input;
     const offset = (page - 1) * limit;
 
     // Build where clause
     const whereClause = and(
-      eq(conversations.userId, userId),
-      isNull(conversations.deletedAt),
-      search ? ilike(conversations.title, `%${search}%`) : undefined
+      eq(sessions.userId, userId),
+      isNull(sessions.deletedAt),
+      search ? ilike(sessions.title, `%${search}%`) : undefined
     );
 
     // Get total count first
     const [countResult] = await tx
       .select({ count: sql<number>`count(*)` })
-      .from(conversations)
+      .from(sessions)
       .where(whereClause)
       .execute();
 
@@ -100,9 +125,9 @@ export async function getSessions(input: z.infer<typeof listSessionsRequestSchem
     // Get paginated sessions
     const results = await tx
       .select()
-      .from(conversations)
+      .from(sessions)
       .where(whereClause)
-      .orderBy(desc(conversations.updatedAt))
+      .orderBy(desc(sessions.updatedAt))
       .limit(limit)
       .offset(offset)
       .execute();
@@ -114,40 +139,41 @@ export async function getSessions(input: z.infer<typeof listSessionsRequestSchem
         limit,
         totalPages,
         totalItems,
-      }
+      },
     };
   });
 }
 
-export async function updateSession(input: z.infer<typeof updateSessionRequestSchema>, userId: string) {
-  return withWriteTransaction(async (tx) => {
+export async function updateSession(
+  input: z.infer<typeof updateSessionRequestSchema>,
+  userId: string
+) {
+  return withWriteTransaction(async tx => {
     // Verify session exists and user has access
-    const [session] = await tx
+    const [existingSession] = await tx
       .select()
-      .from(conversations)
-      .where(and(
-        eq(conversations.id, input.id),
-        eq(conversations.userId, userId),
-        isNull(conversations.deletedAt)
-      ))
+      .from(sessions)
+      .where(
+        and(eq(sessions.id, input.id), eq(sessions.userId, userId), isNull(sessions.deletedAt))
+      )
       .execute();
 
-    if (!session) {
+    if (!existingSession) {
       throw new NotFoundError('Session not found or access denied');
     }
 
     // Build update object with only provided fields
     const updateData: Record<string, unknown> = {};
-    if (input.name) updateData.title = input.name;
+    if (input.title) updateData.title = input.title;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.modelId) updateData.modelId = input.modelId;
-    if (input.metadata) updateData.metadata = input.metadata;
+    if (input.metadata) updateData.metadata = JSON.stringify(input.metadata);
 
     // Update session
     const [updated] = await tx
-      .update(conversations)
+      .update(sessions)
       .set(updateData)
-      .where(eq(conversations.id, input.id))
+      .where(eq(sessions.id, input.id))
       .returning()
       .execute();
 
@@ -155,31 +181,32 @@ export async function updateSession(input: z.infer<typeof updateSessionRequestSc
   });
 }
 
-export async function deleteSession(input: z.infer<typeof deleteSessionRequestSchema>, userId: string) {
-  return withWriteTransaction(async (tx) => {
+export async function deleteSession(
+  input: z.infer<typeof deleteSessionRequestSchema>,
+  userId: string
+) {
+  return withWriteTransaction(async tx => {
     // Verify session exists and user has access
-    const [session] = await tx
+    const [existingSession] = await tx
       .select()
-      .from(conversations)
-      .where(and(
-        eq(conversations.id, input.id),
-        eq(conversations.userId, userId),
-        isNull(conversations.deletedAt)
-      ))
+      .from(sessions)
+      .where(
+        and(eq(sessions.id, input.id), eq(sessions.userId, userId), isNull(sessions.deletedAt))
+      )
       .execute();
 
-    if (!session) {
+    if (!existingSession) {
       throw new NotFoundError('Session not found or access denied');
     }
 
     // Soft delete the session
     const [deleted] = await tx
-      .update(conversations)
-      .set({ 
+      .update(sessions)
+      .set({
         deletedAt: new Date(),
-        isArchived: true 
+        isArchived: true,
       })
-      .where(eq(conversations.id, input.id))
+      .where(eq(sessions.id, input.id))
       .returning()
       .execute();
 
@@ -189,35 +216,31 @@ export async function deleteSession(input: z.infer<typeof deleteSessionRequestSc
 
 // Batch operations
 export async function batchDeleteSessions(sessionIds: string[], userId: string) {
-  return withWriteTransaction(async (tx) => {
+  return withWriteTransaction(async tx => {
     // Verify all sessions exist and user has access
-    const sessions = await tx
+    const existingSessions = await tx
       .select()
-      .from(conversations)
-      .where(and(
-        eq(conversations.userId, userId),
-        isNull(conversations.deletedAt)
-      ))
+      .from(sessions)
+      .where(and(eq(sessions.userId, userId), isNull(sessions.deletedAt)))
       .execute();
 
-    const sessionSet = new Set(sessions.map(s => s.id));
+    const sessionSet = new Set(existingSessions.map(s => s.id));
     const invalidSessions = sessionIds.filter(id => !sessionSet.has(id));
 
     if (invalidSessions.length > 0) {
-      throw new NotFoundError(`Some sessions not found or access denied: ${invalidSessions.join(', ')}`);
+      throw new NotFoundError(
+        `Some sessions not found or access denied: ${invalidSessions.join(', ')}`
+      );
     }
 
     // Soft delete all sessions
     const deleted = await tx
-      .update(conversations)
-      .set({ 
+      .update(sessions)
+      .set({
         deletedAt: new Date(),
-        isArchived: true 
+        isArchived: true,
       })
-      .where(and(
-        sql`${conversations.id} = ANY(${sessionIds})`,
-        eq(conversations.userId, userId)
-      ))
+      .where(and(sql`${sessions.id} = ANY(${sessionIds})`, eq(sessions.userId, userId)))
       .returning()
       .execute();
 
@@ -225,33 +248,29 @@ export async function batchDeleteSessions(sessionIds: string[], userId: string) 
   });
 }
 
-export async function batchArchiveSessions(sessionIds: string[], userId: string, archive: boolean = true) {
-  return withWriteTransaction(async (tx) => {
+export async function batchArchiveSessions(sessionIds: string[], userId: string, archive: boolean) {
+  return withWriteTransaction(async tx => {
     // Verify all sessions exist and user has access
-    const sessions = await tx
+    const existingSessions = await tx
       .select()
-      .from(conversations)
-      .where(and(
-        eq(conversations.userId, userId),
-        isNull(conversations.deletedAt)
-      ))
+      .from(sessions)
+      .where(and(eq(sessions.userId, userId), isNull(sessions.deletedAt)))
       .execute();
 
-    const sessionSet = new Set(sessions.map(s => s.id));
+    const sessionSet = new Set(existingSessions.map(s => s.id));
     const invalidSessions = sessionIds.filter(id => !sessionSet.has(id));
 
     if (invalidSessions.length > 0) {
-      throw new NotFoundError(`Some sessions not found or access denied: ${invalidSessions.join(', ')}`);
+      throw new NotFoundError(
+        `Some sessions not found or access denied: ${invalidSessions.join(', ')}`
+      );
     }
 
     // Update archive status
     const updated = await tx
-      .update(conversations)
+      .update(sessions)
       .set({ isArchived: archive })
-      .where(and(
-        sql`${conversations.id} = ANY(${sessionIds})`,
-        eq(conversations.userId, userId)
-      ))
+      .where(and(sql`${sessions.id} = ANY(${sessionIds})`, eq(sessions.userId, userId)))
       .returning()
       .execute();
 
@@ -263,38 +282,38 @@ export async function createMessage(
   input: z.infer<typeof createMessageRequestSchema>,
   userId: string
 ) {
-  return withWriteTransaction(async (tx) => {
-    // First verify the user has access to the conversation
-    const [conversation] = await tx
+  return withWriteTransaction(async tx => {
+    // First verify the user has access to the session
+    const [session] = await tx
       .select()
-      .from(conversations)
-      .where(and(
-        eq(conversations.id, input.sessionId),
-        eq(conversations.userId, userId),
-        isNull(conversations.deletedAt)
-      ))
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.id, input.sessionId),
+          eq(sessions.userId, userId),
+          isNull(sessions.deletedAt)
+        )
+      )
       .execute();
 
-    if (!conversation) {
-      throw new NotFoundError('Conversation not found');
+    if (!session) {
+      throw new NotFoundError('Session not found');
     }
 
-    if (conversation.deletedAt) {
-      throw new ForbiddenError('Cannot add messages to a deleted conversation');
+    if (session.deletedAt) {
+      throw new ForbiddenError('Cannot add messages to a deleted session');
     }
 
-    // Create all message content blocks
+    // Create messages
     const messages = await Promise.all(
-      input.content.map(async (content) => {
+      input.content.map(async content => {
         const [message] = await tx
-          .insert(messages)
+          .insert(chats)
           .values({
-            conversationId: input.sessionId,
+            sessionId: input.sessionId,
             role: input.role,
             content: content.content,
-            contentType: content.type,
-            language: content.language,
-            metadata: input.metadata,
+            metadata: JSON.stringify(input.metadata),
           })
           .returning()
           .execute();
@@ -303,13 +322,13 @@ export async function createMessage(
       })
     );
 
-    // Update conversation's updatedAt
+    // Update session's updatedAt
     await tx
-      .update(conversations)
+      .update(sessions)
       .set({ updatedAt: new Date() })
-      .where(eq(conversations.id, input.sessionId))
+      .where(eq(sessions.id, input.sessionId))
       .execute();
 
-    return messages[0]; // Return first message for backward compatibility
+    return messages;
   });
-} 
+}

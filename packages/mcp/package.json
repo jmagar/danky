@@ -32,14 +32,14 @@
   },
   "dependencies": {
     "@langchain/anthropic": "^0.3.11",
-    "@langchain/community": "^0.3.20",
-    "@langchain/core": "^0.3.26",
-    "@langchain/groq": "^0.1.2",
-    "@langchain/langgraph": "^0.2.36",
+    "@langchain/community": "^0.3.24",
+    "@langchain/core": "^0.3.29",
+    "@langchain/groq": "^0.1.3",
+    "@langchain/langgraph": "^0.2.39",
     "@langchain/openai": "^0.3.16",
-    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@modelcontextprotocol/sdk": "^1.1.1",
+    "@h1deya/langchain-mcp-tools": "^0.1.4",
     "@n8n/json-schema-to-zod": "^1.1.0",
-    "dotenv": "^16.4.7",
     "json5": "^2.2.3",
     "yargs": "^17.7.2",
     "zod": "^3.24.1"
@@ -48,8 +48,9 @@
     "@danky/eslint-config": "workspace:*",
     "@danky/typescript-config": "workspace:*",
     "@types/yargs": "^17.0.33",
-    "eslint": "^9.0.0",
-    "rimraf": "^5.0.5",
-    "typescript": "^5.3.3"
+    "dotenv": "^16.4.7",
+    "eslint": "^9.18.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.4.5"
   }
 }

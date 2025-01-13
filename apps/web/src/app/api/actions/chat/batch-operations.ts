@@ -16,6 +16,7 @@ import {
   batchRestoreMessagesResponseSchema,
   batchCreateMessagesRequestSchema,
   batchCreateMessagesResponseSchema,
+  type Message,
 } from '@danky/schema';
 import {
   batchDeleteSessions,
@@ -31,13 +32,33 @@ import {
 import { withUser } from '@/lib/session';
 import { withErrorHandling } from '@/lib/errors';
 
+// Helper to transform DB message to API message
+function transformMessage(m: any): Message {
+  return {
+    id: m.id,
+    role: m.role,
+    content: [
+      {
+        type: m.contentType,
+        content: m.content,
+        language: m.language,
+      },
+    ],
+    sessionId: m.conversationId,
+    metadata: m.metadata || {},
+    createdAt: m.createdAt,
+    updatedAt: m.updatedAt,
+  };
+}
+
 // Session batch operations
-async function batchDeleteSessionsHandler(
-  input: z.infer<typeof batchDeleteSessionsRequestSchema>
-) {
-  return withUser(async (user) => {
+async function batchDeleteSessionsHandler(input: z.infer<typeof batchDeleteSessionsRequestSchema>) {
+  return withUser(async user => {
     // Delete sessions
-    const deleted = await batchDeleteSessions(input, user.id);
+    const deleted = await batchDeleteSessions(
+      { ids: input.ids, permanent: input.permanent },
+      user.id
+    );
 
     // Return success response
     return batchDeleteSessionsResponseSchema.parse({
@@ -53,9 +74,9 @@ async function batchDeleteSessionsHandler(
 async function batchRestoreSessionsHandler(
   input: z.infer<typeof batchRestoreSessionsRequestSchema>
 ) {
-  return withUser(async (user) => {
+  return withUser(async user => {
     // Restore sessions
-    const restored = await batchRestoreSessions(input, user.id);
+    const restored = await batchRestoreSessions({ ids: input.ids }, user.id);
 
     // Return success response
     return batchRestoreSessionsResponseSchema.parse({
@@ -71,9 +92,9 @@ async function batchRestoreSessionsHandler(
 async function batchArchiveSessionsHandler(
   input: z.infer<typeof batchArchiveSessionsRequestSchema>
 ) {
-  return withUser(async (user) => {
+  return withUser(async user => {
     // Archive/unarchive sessions
-    const updated = await batchArchiveSessions(input, user.id);
+    const updated = await batchArchiveSessions({ ids: input.ids, archive: input.archive }, user.id);
 
     // Return success response
     return batchArchiveSessionsResponseSchema.parse({
@@ -86,10 +107,8 @@ async function batchArchiveSessionsHandler(
   });
 }
 
-async function batchUpdateSessionsHandler(
-  input: z.infer<typeof batchUpdateSessionsRequestSchema>
-) {
-  return withUser(async (user) => {
+async function batchUpdateSessionsHandler(input: z.infer<typeof batchUpdateSessionsRequestSchema>) {
+  return withUser(async user => {
     // Update sessions
     const updated = await batchUpdateSessions(input, user.id);
 
@@ -105,12 +124,13 @@ async function batchUpdateSessionsHandler(
 }
 
 // Message batch operations
-async function batchDeleteMessagesHandler(
-  input: z.infer<typeof batchDeleteMessagesRequestSchema>
-) {
-  return withUser(async (user) => {
+async function batchDeleteMessagesHandler(input: z.infer<typeof batchDeleteMessagesRequestSchema>) {
+  return withUser(async user => {
     // Delete messages
-    const deleted = await batchDeleteMessages(input, user.id);
+    const deleted = await batchDeleteMessages(
+      { ids: input.ids, permanent: input.permanent },
+      user.id
+    );
 
     // Return success response
     return batchDeleteMessagesResponseSchema.parse({
@@ -126,9 +146,9 @@ async function batchDeleteMessagesHandler(
 async function batchRestoreMessagesHandler(
   input: z.infer<typeof batchRestoreMessagesRequestSchema>
 ) {
-  return withUser(async (user) => {
+  return withUser(async user => {
     // Restore messages
-    const restored = await batchRestoreMessages(input, user.id);
+    const restored = await batchRestoreMessages({ ids: input.ids }, user.id);
 
     // Return success response
     return batchRestoreMessagesResponseSchema.parse({
@@ -141,10 +161,8 @@ async function batchRestoreMessagesHandler(
   });
 }
 
-async function batchCreateMessagesHandler(
-  input: z.infer<typeof batchCreateMessagesRequestSchema>
-) {
-  return withUser(async (user) => {
+async function batchCreateMessagesHandler(input: z.infer<typeof batchCreateMessagesRequestSchema>) {
+  return withUser(async user => {
     // Create messages
     const messages = await batchCreateMessages(input, user.id);
 
@@ -153,19 +171,7 @@ async function batchCreateMessagesHandler(
       success: true,
       data: {
         createdCount: messages.length,
-        messages: messages.map(m => ({
-          id: m.id,
-          role: m.role,
-          content: [{
-            type: m.contentType,
-            content: m.content,
-            language: m.language,
-          }],
-          sessionId: m.conversationId,
-          metadata: m.metadata,
-          createdAt: m.createdAt,
-          updatedAt: m.updatedAt,
-        })),
+        messages: messages.map(transformMessage),
       },
     });
   });
@@ -212,4 +218,4 @@ export const batchCreateChatMessages = withErrorHandling(
   batchCreateMessagesHandler,
   batchCreateMessagesResponseSchema,
   'batchCreateMessages'
-); 
+);

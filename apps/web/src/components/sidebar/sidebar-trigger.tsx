@@ -1,32 +1,33 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { PanelLeft } from "lucide-react";
-import { Button } from "../button";
-import { useSidebar } from "./sidebar-context";
+import * as React from 'react';
+import { PanelLeft } from 'lucide-react';
+import { Button, type ButtonProps } from '@danky/ui';
+import { useSidebarContext } from './sidebar-context';
 
-export const SidebarTrigger = React.forwardRef<
-  React.ElementRef<typeof Button>,
-  React.ComponentPropsWithoutRef<typeof Button>
->(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar();
+export interface SidebarTriggerProps extends ButtonProps {}
 
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={className}
-      onClick={(e) => {
-        onClick?.(e);
-        toggleSidebar();
-      }}
-      ref={ref}
-      {...props}
-    >
-      <PanelLeft className="h-4 w-4" aria-hidden="true" />
-      <span className="sr-only">Toggle sidebar</span>
-    </Button>
-  );
-});
+export const SidebarTrigger = React.forwardRef<HTMLButtonElement, SidebarTriggerProps>(
+  ({ className, onClick, ...props }, ref) => {
+    const { toggleSidebar } = useSidebarContext();
 
-SidebarTrigger.displayName = "SidebarTrigger";
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className={className}
+        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+          onClick?.(e);
+          toggleSidebar();
+        }}
+        ref={ref}
+        {...props}
+      >
+        <PanelLeft className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">Toggle sidebar</span>
+      </Button>
+    );
+  }
+);
+
+SidebarTrigger.displayName = 'SidebarTrigger';

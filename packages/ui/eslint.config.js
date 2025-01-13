@@ -1,8 +1,3 @@
-import reactInternalConfig from "@danky/eslint-config/react-internal";
+import { reactInternalConfig } from '@danky/eslint-config';
 
-export default [
-  {
-    ignores: ["dist", ".turbo", "node_modules"]
-  },
-  ...reactInternalConfig
-]
+export default reactInternalConfig;

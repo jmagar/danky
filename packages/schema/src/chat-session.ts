@@ -18,7 +18,7 @@ export const chatSessionSchema = z.object({
 
 // Create session request
 export const createSessionRequestSchema = z.object({
-  name: z.string().min(1).max(255),
+  title: z.string().min(1).max(255),
   description: z.string().max(1000).optional(),
   modelId: z.enum(MODEL_IDS),
   metadata: sessionMetadataSchema.optional(),
@@ -43,21 +43,23 @@ export const listSessionsRequestSchema = z.object({
 
 // List sessions response
 export const listSessionsResponseSchema = baseResponseSchema.extend({
-  data: z.object({
-    sessions: z.array(chatSessionSchema),
-    pagination: z.object({
-      page: z.number(),
-      limit: z.number(),
-      totalPages: z.number(),
-      totalItems: z.number(),
-    }),
-  }).optional(),
+  data: z
+    .object({
+      sessions: z.array(chatSessionSchema),
+      pagination: z.object({
+        page: z.number(),
+        limit: z.number(),
+        totalPages: z.number(),
+        totalItems: z.number(),
+      }),
+    })
+    .optional(),
 });
 
 // Update session request
 export const updateSessionRequestSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().min(1).max(255).optional(),
+  title: z.string().min(1).max(255).optional(),
   description: z.string().max(1000).optional(),
   modelId: z.enum(MODEL_IDS).optional(),
   isArchived: z.boolean().optional(),
@@ -77,10 +79,12 @@ export const deleteSessionRequestSchema = z.object({
 
 // Delete session response
 export const deleteSessionResponseSchema = baseResponseSchema.extend({
-  data: z.object({
-    id: z.string(),
-    deletedAt: z.date(),
-  }).optional(),
+  data: z
+    .object({
+      id: z.string(),
+      deletedAt: z.date(),
+    })
+    .optional(),
 });
 
 // Restore session request
@@ -91,4 +95,4 @@ export const restoreSessionRequestSchema = z.object({
 // Restore session response
 export const restoreSessionResponseSchema = baseResponseSchema.extend({
   data: chatSessionSchema.optional(),
-}); 
+});

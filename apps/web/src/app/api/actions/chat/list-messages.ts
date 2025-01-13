@@ -1,14 +1,19 @@
 'use server';
 
-import { z } from 'zod';
 import { listMessagesResponseSchema } from '@danky/schema';
-import { webListMessagesSchema } from '@/lib/validations/chat';
+import { webListMessagesSchema, type WebListMessagesParams } from '@/lib/validations/chat';
 import { getMessages } from '@/lib/db/chat';
+import { withUser } from '@/lib/session';
+import { withErrorHandling } from '@/lib/errors';
 
-export async function listMessages(input: z.infer<typeof webListMessagesSchema>) {
-  try {
-    // Validate input
-    const validatedInput = webListMessagesSchema.parse(input);
+// Export the request schema type for client usage
+export type ListMessagesParams = WebListMessagesParams;
+
+async function listMessagesHandler(input: string) {
+  return withUser(async _user => {
+    // Parse and validate input
+    const params = JSON.parse(input);
+    const validatedInput = webListMessagesSchema.parse(params);
 
     // Query messages from database
     const { messages, pagination } = await getMessages(validatedInput);
@@ -17,36 +22,33 @@ export async function listMessages(input: z.infer<typeof webListMessagesSchema>)
     const transformedMessages = messages.map(msg => ({
       id: msg.id,
       role: msg.role,
-      content: [{
-        type: 'text' as const,
-        content: msg.content,
-      }],
-      sessionId: msg.conversationId,
+      content: [
+        {
+          type: 'text',
+          content: msg.content,
+        },
+      ],
+      sessionId: msg.sessionId,
       metadata: msg.metadata,
       createdAt: msg.createdAt,
       updatedAt: msg.updatedAt,
+      deletedAt: msg.deletedAt,
     }));
 
     // Return success response
     return listMessagesResponseSchema.parse({
       success: true,
-      data: transformedMessages,
-      pagination,
+      data: {
+        messages: transformedMessages,
+        pagination,
+      },
     });
-  } catch (error) {
-    // Handle validation errors
-    if (error instanceof z.ZodError) {
-      return listMessagesResponseSchema.parse({
-        success: false,
-        error: 'Invalid input: ' + error.errors.map(e => e.message).join(', '),
-      });
-    }
+  });
+}
 
-    // Handle other errors
-    console.error('Error listing messages:', error);
-    return listMessagesResponseSchema.parse({
-      success: false,
-      error: 'Failed to list messages',
-    });
-  }
-} 
+// Export the wrapped handler with error handling
+export const listMessages = withErrorHandling(
+  listMessagesHandler,
+  listMessagesResponseSchema,
+  'listMessages'
+);

@@ -1,5 +1,8 @@
+// Export types
+export * from './types';
+
 // Message operations
-export { listMessages } from './list-messages';
+export { listMessages, type ListMessagesParams } from './list-messages';
 export { createChatMessage } from './create-message';
 
 // Session operations
@@ -13,4 +16,4 @@ export {
   batchDeleteChatSessions,
   batchArchiveChatSessions,
   batchCreateChatMessages,
-} from './batch-operations'; 
+} from './batch-operations';

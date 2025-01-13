@@ -4,8 +4,8 @@ const nextConfig = {
   transpilePackages: ['@danky/ui', '@danky/mcp'],
   experimental: {
     esmExternals: true,
-    serverComponentsExternalPackages: ['shiki'],
   },
+  serverExternalPackages: ['shiki'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -17,7 +17,7 @@ const nextConfig = {
         net: false,
         tls: false,
         process: false,
-      }
+      };
       // Handle node: protocol imports
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -28,27 +28,27 @@ const nextConfig = {
         'node:process': false,
         'node:fs': false,
         'node:path': false,
-      }
+      };
     }
 
     // Add module resolution aliases
     config.resolve.alias = {
       ...config.resolve.alias,
       '@n8n/json-schema-to-zod': '@n8n/json-schema-to-zod',
-    }
+    };
 
     // Add extension resolution
     config.resolve.extensionAlias = {
       '.js': ['.js', '.ts', '.tsx'],
       '.jsx': ['.jsx', '.tsx'],
-    }
+    };
 
-    return config
+    return config;
   },
   eslint: {
     ignoreDuringBuilds: false,
-    dirs: ['src/app', 'src/components', 'src/lib', 'src/hooks']
-  }
-}
+    dirs: ['src/app', 'src/components', 'src/lib', 'src/hooks'],
+  },
+};
 
-module.exports = nextConfig
+export default nextConfig;

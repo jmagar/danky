@@ -1,13 +1,13 @@
 'use client';
 
+import React from 'react';
 import { useState } from 'react';
 import { useChatStore } from '@/lib/stores/chat-store';
-import { Button, Textarea, buttonVariants } from '@danky/ui';
+import { Textarea, buttonVariants, cn } from '@danky/ui';
 import { SendHorizontal, Loader2 } from 'lucide-react';
 import { AttachmentButton } from './attachment-button';
 import { ToolsDropdown } from './tools-dropdown';
 import { type Server } from './types';
-import { cn } from '@danky/ui/utils';
 
 interface ChatInputProps {
   isProcessing: boolean;

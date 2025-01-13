@@ -1,23 +1,17 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
-  dts: {
-    resolve: true,
-  },
+  dts: true,
+  sourcemap: true,
   clean: true,
   external: [
     'react',
     'react-dom',
     '@radix-ui/*',
-    'cmdk',
-    'react-day-picker',
-    'recharts',
-    'next-themes',
-    'sonner',
-    'lucide-react'
+    'class-variance-authority',
+    'clsx',
+    'tailwind-merge',
   ],
-  treeshake: true,
-  sourcemap: true,
-}) 
+});

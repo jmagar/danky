@@ -1,36 +1,18 @@
 'use client';
 
+import React from 'react';
+import { ScrollArea } from '@danky/ui';
 import { Message } from './message';
-import { type Message as MessageType } from './types';
-import { cn } from '@danky/ui/utils';
+import { useChat } from '@/hooks/use-chat';
 
-interface ChatMessagesProps {
-  messages: MessageType[];
-}
+export function ChatMessages() {
+  const { messages } = useChat();
 
-export function ChatMessages({ messages }: ChatMessagesProps) {
   return (
-    <div className="flex flex-col space-y-4">
-      {messages.map((message, index) => {
-        // Get the first text content from the message
-        const content = Array.isArray(message.content)
-          ? message.content[0]?.content || ''
-          : message.content;
-
-        return (
-          <Message
-            key={`${message.role}-${index}-${message.timestamp.getTime()}`}
-            role={message.role}
-            content={content}
-            timestamp={message.timestamp}
-          />
-        );
-      })}
-      {messages.length === 0 && (
-        <div className="text-muted-foreground flex h-[50vh] items-center justify-center">
-          Start a conversation...
-        </div>
-      )}
-    </div>
+    <ScrollArea className="flex-1 p-4">
+      {messages.map(message => (
+        <Message key={message.id} message={message} />
+      ))}
+    </ScrollArea>
   );
 }

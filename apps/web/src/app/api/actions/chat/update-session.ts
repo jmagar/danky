@@ -22,15 +22,21 @@ export async function updateChatSession(input: z.infer<typeof updateSessionReque
       });
     }
 
+    // Parse metadata if it exists
+    const metadata = session.metadata ? JSON.parse(session.metadata) : null;
+
     // Transform session to match our schema
     const transformedSession = {
       id: session.id,
-      name: session.title,
-      modelId: session.metadata?.modelId ?? 'default-model',
-      description: session.metadata?.description,
-      metadata: session.metadata,
+      title: session.title,
+      modelId: metadata?.model?.id ?? 'gpt-4-turbo-preview',
+      description: session.description,
+      metadata,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
+      userId: session.userId,
+      isArchived: session.isArchived,
+      deletedAt: session.deletedAt,
     };
 
     // Return success response
@@ -54,4 +60,4 @@ export async function updateChatSession(input: z.infer<typeof updateSessionReque
       error: 'Failed to update session',
     });
   }
-} 
+}

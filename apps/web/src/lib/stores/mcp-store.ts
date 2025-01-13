@@ -1,30 +1,32 @@
-'use client'
+'use client';
 
-import { create } from 'zustand'
-import * as mcpActions from '../actions/mcp-actions'
+import { create } from 'zustand';
+import * as mcpActions from '../actions/mcp-actions';
 
-type ServerStatus = 'connected' | 'disconnected' | 'error'
+type ServerStatus = 'connected' | 'disconnected' | 'error';
 
 interface Tool {
-  serverId: string
-  toolId: string
-  name: string
-  description: string
+  serverId: string;
+  toolId: string;
+  name: string;
+  description: string;
 }
 
 interface MCPState {
-  isInitialized: boolean
-  isInitializing: boolean
-  serverStatus: Record<string, ServerStatus>
-  availableTools: Tool[]
-  error: string | null
+  isInitialized: boolean;
+  isInitializing: boolean;
+  serverStatus: Record<string, ServerStatus>;
+  availableTools: Tool[];
+  error: string | null;
 }
 
 interface MCPActions {
-  initialize: () => Promise<void>
-  processMessage: (message: string) => Promise<string>
-  reset: () => void
+  initialize: () => Promise<void>;
+  processMessage: (message: string) => Promise<string>;
+  reset: () => void;
 }
+
+type MCPStore = MCPState & MCPActions;
 
 const initialState: MCPState = {
   isInitialized: false,
@@ -32,53 +34,53 @@ const initialState: MCPState = {
   serverStatus: {},
   availableTools: [],
   error: null,
-}
+};
 
-export const useMCPStore = create<MCPState & MCPActions>((set, get) => ({
+export const useMCPStore = create<MCPStore>((set, get) => ({
   ...initialState,
 
   initialize: async () => {
-    if (get().isInitialized || get().isInitializing) return
+    if (get().isInitialized || get().isInitializing) return;
 
-    set({ isInitializing: true })
+    set({ isInitializing: true });
 
     try {
-      const result = await mcpActions.initialize()
-      
+      const result = await mcpActions.initialize();
+
       set({
         isInitialized: result.isInitialized,
         serverStatus: result.serverStatus,
         availableTools: result.availableTools,
-        error: result.error
-      })
+        error: result.error,
+      });
     } catch (error) {
-      set({ 
+      set({
         isInitialized: false,
         error: error instanceof Error ? error.message : 'Failed to initialize MCP service',
         serverStatus: {},
-        availableTools: []
-      })
+        availableTools: [],
+      });
     } finally {
-      set({ isInitializing: false })
+      set({ isInitializing: false });
     }
   },
 
   processMessage: async (message: string) => {
     if (!get().isInitialized) {
-      throw new Error('MCP service not initialized')
+      throw new Error('MCP service not initialized');
     }
 
     try {
-      return await mcpActions.processMessage(message)
+      return await mcpActions.processMessage(message);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process message'
-      set({ error: errorMessage })
-      throw new Error(errorMessage)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process message';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
     }
   },
 
   reset: () => {
-    mcpActions.shutdown().catch(console.error)
-    set(initialState)
-  }
-})) 
+    mcpActions.shutdown().catch(console.error);
+    set(initialState);
+  },
+}));

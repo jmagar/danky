@@ -1,11 +1,10 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["cjs", "esm"],
+  entry: ['src/index.ts'],
+  format: ['esm'],
   dts: true,
-  splitting: false,
   sourcemap: true,
   clean: true,
-  external: ["@danky/logger"],
+  external: ['pg', 'drizzle-orm', 'drizzle-orm/pg-core'],
 });

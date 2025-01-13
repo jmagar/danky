@@ -1,8 +1,9 @@
+import { createLogger } from '@danky/logger';
 import { z } from 'zod';
-import { logger } from '@danky/logger';
 
-// Error types
-export class BaseError extends Error {
+const logger = createLogger('error-handler');
+
+export class AppError extends Error {
   constructor(
     message: string,
     public code: string,
@@ -10,173 +11,105 @@ export class BaseError extends Error {
     public details?: unknown
   ) {
     super(message);
-    this.name = this.constructor.name;
+    this.name = 'AppError';
   }
 }
 
-export class ValidationError extends BaseError {
-  constructor(message: string, details?: z.ZodError) {
-    super(message, 'VALIDATION_ERROR', 400, details);
-  }
-}
-
-export class NotFoundError extends BaseError {
-  constructor(message: string) {
-    super(message, 'NOT_FOUND', 404);
-  }
-}
-
-export class ForbiddenError extends BaseError {
-  constructor(message: string) {
-    super(message, 'FORBIDDEN', 403);
-  }
-}
-
-export class UnauthorizedError extends BaseError {
-  constructor(message: string) {
-    super(message, 'UNAUTHORIZED', 401);
-  }
-}
-
-export class RateLimitError extends BaseError {
-  constructor(message: string, details?: { retryAfter?: number }) {
-    super(message, 'RATE_LIMIT', 429, details);
-  }
-}
-
-export class DatabaseError extends BaseError {
+export class WebSocketError extends AppError {
   constructor(message: string, details?: unknown) {
-    super(message, 'DATABASE_ERROR', 500, details);
+    super(message, 'WEBSOCKET_ERROR', 500, details);
+    this.name = 'WebSocketError';
   }
 }
 
-export class TokenLimitError extends BaseError {
-  constructor(message: string, details?: { limit: number; current: number }) {
-    super(message, 'TOKEN_LIMIT', 400, details);
+export class APIError extends AppError {
+  constructor(message: string, statusCode: number = 500, details?: unknown) {
+    super(message, 'API_ERROR', statusCode, details);
+    this.name = 'APIError';
   }
 }
 
-export class BatchOperationError extends BaseError {
-  constructor(message: string, details?: { errors: Array<{ id: string; error: string }> }) {
-    super(message, 'BATCH_OPERATION_ERROR', 400, details);
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized', details?: unknown) {
+    super(message, 'UNAUTHORIZED', 401, details);
+    this.name = 'UnauthorizedError';
   }
 }
 
-// Error handler wrapper
-export function withErrorHandling<T extends z.ZodType>(
-  handler: (...args: any[]) => Promise<z.infer<T>>,
-  responseSchema: T,
+export class ForbiddenError extends AppError {
+  constructor(message: string = 'Forbidden', details?: unknown) {
+    super(message, 'FORBIDDEN', 403, details);
+    this.name = 'ForbiddenError';
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(message: string = 'Not Found', details?: unknown) {
+    super(message, 'NOT_FOUND', 404, details);
+    this.name = 'NotFoundError';
+  }
+}
+
+export function handleError(error: unknown): never {
+  if (error instanceof AppError) {
+    logger.error(
+      {
+        code: error.code,
+        statusCode: error.statusCode,
+        details: error.details,
+      },
+      error.message
+    );
+    throw error;
+  }
+
+  // Handle unknown errors
+  logger.error({ error }, 'Unexpected error occurred');
+  throw new AppError('An unexpected error occurred', 'UNKNOWN_ERROR');
+}
+
+export function withErrorHandling<TInput, TOutput>(
+  handler: (input: TInput) => Promise<TOutput>,
+  responseSchema: z.ZodType<TOutput>,
   operationName: string
-) {
-  return async (...args: Parameters<typeof handler>): Promise<z.infer<T>> => {
+): (input: TInput) => Promise<TOutput> {
+  return async (input: TInput) => {
     try {
-      const result = await handler(...args);
+      const result = await handler(input);
       return responseSchema.parse(result);
     } catch (error) {
-      logger.error({
-        operation: operationName,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error instanceof BaseError ? error.details : undefined,
-        args,
-      });
+      logger.error({ error, input, operation: operationName }, 'Operation failed');
+
+      if (error instanceof AppError) {
+        // Return error response
+        return responseSchema.parse({
+          success: false,
+          error: error.message,
+        });
+      }
 
       if (error instanceof z.ZodError) {
-        throw new ValidationError('Invalid request data', error);
+        // Return validation error response
+        return responseSchema.parse({
+          success: false,
+          error: `Validation failed: ${error.errors.map(e => e.message).join(', ')}`,
+        });
       }
 
-      if (error instanceof BaseError) {
-        throw error;
-      }
-
-      throw new BaseError(
-        'An unexpected error occurred',
-        'INTERNAL_SERVER_ERROR',
-        500
-      );
+      // Return generic error response
+      return responseSchema.parse({
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      });
     }
   };
 }
 
-// Partial success handler for batch operations
-export function handlePartialSuccess<T>(
-  results: Array<{ success: boolean; error?: string; data?: T }>,
-  operation: string
-): {
-  successful: T[];
-  failed: Array<{ error: string }>;
-} {
-  const successful: T[] = [];
-  const failed: Array<{ error: string }> = [];
-
-  results.forEach((result) => {
-    if (result.success && result.data) {
-      successful.push(result.data);
-    } else {
-      failed.push({ error: result.error || `${operation} failed` });
-    }
-  });
-
-  if (failed.length > 0 && successful.length === 0) {
-    throw new BatchOperationError(`All ${operation} operations failed`, {
-      errors: failed.map((f, i) => ({ id: String(i), error: f.error })),
-    });
-  }
-
-  return { successful, failed };
-}
-
-// Rate limiting helper
-const rateLimits = new Map<string, { count: number; resetAt: number }>();
-
-export function checkRateLimit(
-  key: string,
-  limit: number,
-  windowMs: number = 60000
-): void {
-  const now = Date.now();
-  const current = rateLimits.get(key);
-
-  if (!current || current.resetAt <= now) {
-    rateLimits.set(key, { count: 1, resetAt: now + windowMs });
-    return;
-  }
-
-  if (current.count >= limit) {
-    const retryAfter = Math.ceil((current.resetAt - now) / 1000);
-    throw new RateLimitError('Rate limit exceeded', { retryAfter });
-  }
-
-  current.count++;
-}
-
-// Token counting helper
-export function checkTokenLimit(
-  content: string,
-  limit: number,
-  current: number = 0
-): void {
-  // Simple approximation: 1 token ≈ 4 characters
-  const estimatedTokens = Math.ceil(content.length / 4);
-  
-  if (current + estimatedTokens > limit) {
-    throw new TokenLimitError('Token limit exceeded', {
-      limit,
-      current: current + estimatedTokens,
-    });
-  }
-}
-
-// Database error handler
 export function handleDatabaseError(error: unknown): never {
-  if (error instanceof Error) {
-    // Handle specific database errors
-    if (error.message.includes('duplicate key')) {
-      throw new ValidationError('Duplicate record');
-    }
-    if (error.message.includes('foreign key')) {
-      throw new ValidationError('Invalid reference');
-    }
-    throw new DatabaseError('Database operation failed', error);
+  if (error instanceof AppError) {
+    throw error;
   }
-  throw new DatabaseError('Unknown database error');
-} 
+
+  logger.error({ error }, 'Database error occurred');
+  throw new AppError('A database error occurred', 'DATABASE_ERROR', 500);
+}

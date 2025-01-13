@@ -1,19 +1,17 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { useSidebar } from "./sidebar-context";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { useSidebarContext } from './sidebar-context';
 
-export function SidebarToggle({
-  className,
-}: React.HTMLAttributes<HTMLButtonElement>) {
-  const { toggleSidebar } = useSidebar();
+export function SidebarToggle({ className }: React.HTMLAttributes<HTMLButtonElement>) {
+  const { toggleSidebar } = useSidebarContext();
 
   return (
     <button
       onClick={toggleSidebar}
       className={cn(
-        "absolute -right-4 top-4 z-50 flex h-8 w-8 items-center justify-center rounded-full border bg-background shadow-sm",
+        'bg-background absolute -right-4 top-4 z-50 flex h-8 w-8 items-center justify-center rounded-full border shadow-sm',
         className
       )}
     >
